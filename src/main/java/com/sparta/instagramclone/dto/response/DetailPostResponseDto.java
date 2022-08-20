@@ -17,6 +17,7 @@ public class DetailPostResponseDto {
     private List<String> imgUrlList;
     private String author;
     private String content;
+    private Boolean heartByMe;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
     private List<CommentResponseDto> commentResponseDtoList;

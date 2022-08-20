@@ -32,14 +32,14 @@ public class PostController {
 
 //유저 게시글 조회
     @GetMapping(value = "/api/posts/member/{memberId}")
-    public ResponseDto<?> memberPost(@PathVariable Long memberId){
-        return postService.getMemberPost(memberId);
+    public ResponseDto<?> memberPost(@PathVariable Long memberId, HttpServletRequest request){
+        return postService.getMemberPost(memberId, request);
     }
 
     //게시글 상제 조회
     @GetMapping(value = "/api/posts/{postId}")
-    public ResponseDto<?> detailPost(@PathVariable Long postId){
-        return postService.getDetailPost(postId);
+    public ResponseDto<?> detailPost(@PathVariable Long postId, HttpServletRequest request){
+        return postService.getDetailPost(postId, request);
     }
 
     @PutMapping("/api/posts/{postId}")
