@@ -52,7 +52,7 @@ public class FollowService {
             return ResponseDto.success(false);
         }
     }
-    @javax.transaction.Transactional
+    @Transactional
     public Member validateMember(HttpServletRequest request) {
         if (!jwtTokenProvider.validateToken(request.getHeader("Authorization").substring(7))) {
             return null;

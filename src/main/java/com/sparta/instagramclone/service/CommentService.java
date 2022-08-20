@@ -9,12 +9,13 @@ import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
