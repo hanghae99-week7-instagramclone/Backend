@@ -10,13 +10,19 @@ import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+<<<<<<< HEAD
 import lombok.val;
+=======
+>>>>>>> a0b7b64936c1eed97cd889b26f387e132a2de405
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
+<<<<<<< HEAD
 
+=======
+>>>>>>> a0b7b64936c1eed97cd889b26f387e132a2de405
 @Slf4j
 @Service
 @RequiredArgsConstructor
