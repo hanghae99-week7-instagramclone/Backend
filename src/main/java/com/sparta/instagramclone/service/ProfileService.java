@@ -26,7 +26,6 @@ public class ProfileService {
     private final JwtTokenProvider jwtTokenProvider;
     private final AwsS3Service awsS3Service;
     private final AmazonS3Client amazonS3Client;
-
     private final MemberRepository memberRepository;
 
     @Value("cloud.aws.s3.bucket")

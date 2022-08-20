@@ -4,8 +4,6 @@ import com.sparta.instagramclone.dto.request.CommentRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.util.Lazy;
-
 import javax.persistence.*;
 
 @Entity
