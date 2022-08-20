@@ -33,7 +33,7 @@ public class Comment extends Timestamped {
     }
 
     public boolean validateMember(Member member) {
-        return !this.member.equals(member);
+        return !this.member.getId().equals(member.getId());
     }
     @Builder
     public Comment(String content, Member member, Post post){
