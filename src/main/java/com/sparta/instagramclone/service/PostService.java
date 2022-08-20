@@ -1,14 +1,13 @@
 package com.sparta.instagramclone.service;
 
+import com.sparta.instagramclone.domain.Comment;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.domain.Post;
-import com.sparta.instagramclone.dto.JwtTokenDto;
 import com.sparta.instagramclone.dto.request.PostRequestDto;
-import com.sparta.instagramclone.dto.response.MemberPostResponseDto;
-import com.sparta.instagramclone.dto.response.PostResponseDto;
-import com.sparta.instagramclone.dto.response.ResponseDto;
+import com.sparta.instagramclone.dto.response.*;
 import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
+import com.sparta.instagramclone.repository.CommentRepository;
 import com.sparta.instagramclone.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +27,7 @@ import java.util.*;
 public class PostService {
     private final AwsS3Service awsS3Service;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Value("cloud.aws.s3.bucket")
@@ -70,22 +70,125 @@ public class PostService {
     }
 
     //유저 게시물 조회
-//    @Transactional
-//    public ResponseDto<?> getMemberPost(Long memberId, HttpServletRequest request){
-//        Set<Post> postList = postRepository.findAllByMember_Id(memberId);
-//        List<MemberPostResponseDto> memberPostResponseDtoList = new ArrayList<>();
-//        for(Post post : postList){
-//            memberPostResponseDtoList.add(
-//                    MemberPostResponseDto.builder()
-//                            .id(post.getId())
-//                            .content(post.getContent())
-//                            .imageUrlList(post.getImgUrlList())
-//                            .createdAt(post.getCreatedAt())
-//                            .modifiedAt((post.getModifiedAt()))
-//                            .build());
-//        }
-//        return ResponseDto.success(memberPostResponseDtoList);
-//    }
+    @Transactional
+    public ResponseDto<?> getMemberPost(Long memberId){
+        List<Post> postList = postRepository.findAllByMember_Id(memberId);
+        List<MemberPostResponseDto> memberPostResponseDtoList = new ArrayList<>();
+        log.info(String.valueOf(postList));
+        for(Post post : postList){
+            memberPostResponseDtoList.add(
+                    MemberPostResponseDto.builder()
+                            .id(post.getId())
+                            .content(post.getContent())
+                            .imageUrlList(post.getImgUrlList())
+                            .createdAt(post.getCreatedAt())
+                            .modifiedAt((post.getModifiedAt()))
+                            .build());
+        }
+        return ResponseDto.success(memberPostResponseDtoList);
+    }
+
+    //게시물 상세 조회
+    @Transactional
+    public ResponseDto<?> getDetailPost(Long postId){
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            return ResponseDto.fail("NOT_FOUND", "게시글을 찾을 수 없습니다.");
+        }
+        List<Comment> commentList = commentRepository.findAllByPost_Id(postId);
+        List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+        for (Comment comment : commentList) {
+            commentResponseDtoList.add(CommentResponseDto.builder()
+                    .id(comment.getId())
+                    .content(comment.getContent())
+                    .createdAt(comment.getCreatedAt())
+                    .modifiedAt(comment.getModifiedAt())
+                    .postId(comment.getPost().getId())
+                    .memberId(comment.getMember().getId())
+                    .nickname(comment.getMember().getNickname())
+                    .build());
+        }
+        return ResponseDto.success(DetailPostResponseDto.builder()
+                .id(post.get().getId())
+                .imgUrlList(post.get().getImgUrlList())
+                .author(post.get().getMember().getNickname())
+                .content(post.get().getContent())
+                .createdAt(post.get().getCreatedAt())
+                .modifiedAt(post.get().getModifiedAt())
+                .commentResponseDtoList(commentResponseDtoList)
+                .build());
+
+    }
+
+    @Transactional
+    public ResponseDto<?> updatePost(Long postId, List<MultipartFile> multipartFile, PostRequestDto postRequestDto, HttpServletRequest request) throws IOException {
+        Member member = validateMember(request);
+        if (null == member) {
+            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+        }
+
+        Post post = checkPost(postId);
+        if (null == post) {
+            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+        }
+
+        if (post.validateMember(member)) {
+            return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
+        }
+
+        List<String> imgUrlList = new ArrayList<>();
+
+        if (multipartFile != null) {
+            for (MultipartFile imgFile : multipartFile) {
+                String imgUrl = awsS3Service.upload(imgFile);
+                //String imgUrl = URLDecoder.decode(fileName, "UTF-8");
+                if (imgUrl.equals("false")) {
+                    return ResponseDto.fail("NOT_IMAGE_FILE", "이미지 파일만 업로드 가능합니다.");
+                }
+                imgUrlList.add(imgUrl);
+                post.update(postRequestDto, imgUrlList);
+            }
+        } else {
+            post.update(postRequestDto, null);
+        }
+        return ResponseDto.success(
+                PostResponseDto.builder()
+                        .id(post.getId())
+                        .author(post.getMember().getNickname())
+                        .imgUrlList(post.getImgUrlList())
+                        .content(post.getContent())
+                        .createdAt(post.getCreatedAt())
+                        .modifiedAt(post.getModifiedAt())
+                        .build()
+        );
+    }
+
+    @Transactional
+    public ResponseDto<?> deletePost(Long postId, HttpServletRequest request) {
+        Member member = validateMember(request);
+        if (null == member) {
+            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+        }
+
+        Post post = checkPost(postId);
+        if (null == post) {
+            return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
+        }
+
+        if (post.validateMember(member)) {
+            return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
+        }
+
+        List<String> deleteImgList = post.getImgUrlList();
+        for (String img : deleteImgList) {
+            log.info(img);
+            String key = img.substring("https://mini-spring-bucket-team7.s3.ap-northeast-2.amazonaws.com/".length());
+            awsS3Service.deleteS3(key);
+        }
+
+        postRepository.delete(post);
+        return ResponseDto.success("delete success");
+    }
 
     @Transactional
     public Member validateMember(HttpServletRequest request) {
@@ -96,7 +199,7 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public Post isPresentPost(Long id) {
+    public Post checkPost(Long id) {
         Optional<Post> optionalPost = postRepository.findById(id);
         return optionalPost.orElse(null);
     }

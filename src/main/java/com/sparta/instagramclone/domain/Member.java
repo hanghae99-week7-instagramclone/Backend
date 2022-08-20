@@ -45,7 +45,9 @@ public class Member extends Timestamped{
         this.websiteUrl = profileRequestDto.getWebsiteUrl();
         this.bio = profileRequestDto.getBio();
         this.email = profileRequestDto.getEmail();
-        this.profileUrl =  profileUrl;
+        if(profileUrl != null){
+            this.profileUrl =  profileUrl;
+        }
     }
 
 }

@@ -21,7 +21,7 @@ public class PostController {
     private final PostRepository postRepository;
 
     @PostMapping(value = "/api/posts")
-    public ResponseDto<?> createQuestion(@RequestPart(required = false) List<MultipartFile> multipartFile,
+    public ResponseDto<?> createPost(@RequestPart(required = false) List<MultipartFile> multipartFile,
                                          @RequestPart PostRequestDto postRequestDto,
                                          HttpServletRequest request) throws IOException {
         if (multipartFile.isEmpty()) {
@@ -30,8 +30,27 @@ public class PostController {
         return postService.createPost(multipartFile, postRequestDto, request);
     }
 
-//    @GetMapping(value = "/api/posts/member/{memberId}")
-//    public ResponseDto<?> memberPost(@PathVariable Long memberId, HttpServletRequest request){
-//        return postService.getMemberPost(memberId, request);
-//    }
+//유저 게시글 조회
+    @GetMapping(value = "/api/posts/member/{memberId}")
+    public ResponseDto<?> memberPost(@PathVariable Long memberId){
+        return postService.getMemberPost(memberId);
+    }
+
+    //게시글 상제 조회
+    @GetMapping(value = "/api/posts/{postId}")
+    public ResponseDto<?> detailPost(@PathVariable Long postId){
+        return postService.getDetailPost(postId);
+    }
+
+    @PutMapping("/api/posts/{postId}")
+    public ResponseDto<?> updatePost(@PathVariable Long postId, @RequestPart(required = false) List<MultipartFile> multipartFile,
+                                     @RequestPart PostRequestDto postRequestDto,
+                                     HttpServletRequest request) throws IOException {
+        return postService.updatePost(postId, multipartFile, postRequestDto, request);
+    }
+
+    @DeleteMapping("/api/posts/{postId}")
+    public ResponseDto<?> deletePost(@PathVariable Long postId, HttpServletRequest request) {
+        return postService.deletePost(postId, request);
+    }
 }

@@ -5,10 +5,7 @@ import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.service.ProfileService;
 import lombok.RequiredArgsConstructor;
 import org.opengis.annotation.Profile;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +18,12 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @PutMapping("")
-    public ResponseDto<?> updateProfile(@RequestPart("data")ProfileRequestDto profileRequestDto, @RequestPart("image")MultipartFile file, HttpServletRequest request) throws IOException {
+    public ResponseDto<?> updateProfile(@RequestPart("data")ProfileRequestDto profileRequestDto, @RequestPart(value = "image", required = false) MultipartFile file, HttpServletRequest request) throws IOException {
         return profileService.updateProfile(profileRequestDto, file, request);
+    }
+
+    @GetMapping("/{memberId}")
+    public ResponseDto<?> getProfile(@PathVariable Long memberId){
+        return profileService.getProfile(memberId);
     }
 }

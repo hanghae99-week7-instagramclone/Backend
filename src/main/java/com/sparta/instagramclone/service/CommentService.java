@@ -9,12 +9,15 @@ import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Optional;
 
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CommentService {
@@ -37,7 +40,7 @@ public class CommentService {
             return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
         }
 
-        Post post = postService.isPresentPost(postId);
+        Post post = postService.checkPost(postId);
         if (null == post) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
         }
@@ -74,12 +77,12 @@ public class CommentService {
             return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
         }
 
-        Post post = postService.isPresentPost(postId);
+        Post post = postService.checkPost(postId);
         if (null == post) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
         }
 
-        Comment comment = isPresentComment(commentId);
+        Comment comment = checkComment(commentId);
         if (null == comment) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글 id 입니다.");
         }
@@ -115,18 +118,18 @@ public class CommentService {
             return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
         }
 
-        Post post = postService.isPresentPost(postId);
+        Post post = postService.checkPost(postId);
         if (null == post) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 게시글 id 입니다.");
         }
 
-        Comment comment = isPresentComment(commentId);
+        Comment comment = checkComment(commentId);
         if (null == comment) {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 댓글 id 입니다.");
         }
 
         if (comment.validateMember(member)) {
-            return ResponseDto.fail("BAD_REQUEST", "작성자만 수정할 수 있습니다.");
+            return ResponseDto.fail("BAD_REQUEST", "작성자만 삭제할 수 있습니다.");
         }
 
         commentRepository.delete(comment);
@@ -142,7 +145,7 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public Comment isPresentComment(Long id) {
+    public Comment checkComment(Long id) {
         Optional<Comment> optionalComment = commentRepository.findById(id);
         return optionalComment.orElse(null);
     }
