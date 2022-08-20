@@ -30,9 +30,22 @@ public class PostController {
         return postService.createPost(multipartFile, postRequestDto, request);
     }
 
+    //게시글 전체 조회
     @GetMapping("/api/posts")
     public ResponseDto<?> getAllPost() {
         return postService.getAllPosts();
+
+    //유저 게시글 조회
+    @GetMapping(value = "/api/posts/member/{memberId}")
+    public ResponseDto<?> memberPost(@PathVariable Long memberId){
+        return postService.getMemberPost(memberId);
+    }
+
+    //게시글 상세 조회
+    @GetMapping(value = "/api/posts/{postId}")
+    public ResponseDto<?> detailPost(@PathVariable Long postId, HttpServletRequest request){
+        return postService.getDetailPost(postId, request);
+
     }
 
     @PutMapping("/api/posts/{postId}")
