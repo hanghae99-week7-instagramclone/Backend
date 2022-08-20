@@ -20,7 +20,7 @@ public class PostController {
     private final PostService postService;
     private final PostRepository postRepository;
 
-    @PostMapping(value = "/api/posts")
+    @PostMapping("/api/posts")
     public ResponseDto<?> createPost(@RequestPart(required = false) List<MultipartFile> multipartFile,
                                          @RequestPart PostRequestDto postRequestDto,
                                          HttpServletRequest request) throws IOException {
@@ -28,6 +28,11 @@ public class PostController {
             throw new IllegalArgumentException("MULTIPART FILE IS EMPTY");
         }
         return postService.createPost(multipartFile, postRequestDto, request);
+    }
+
+    @GetMapping("/api/posts")
+    public ResponseDto<?> getAllPost() {
+        return postService.getAllPosts();
     }
 
     @PutMapping("/api/posts/{postId}")

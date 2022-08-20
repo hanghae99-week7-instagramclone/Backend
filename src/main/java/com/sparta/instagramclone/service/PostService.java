@@ -1,12 +1,18 @@
 package com.sparta.instagramclone.service;
 
+import com.sparta.instagramclone.domain.Comment;
+import com.sparta.instagramclone.domain.Like;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.domain.Post;
 import com.sparta.instagramclone.dto.request.PostRequestDto;
+import com.sparta.instagramclone.dto.response.CommentResponseDto;
+import com.sparta.instagramclone.dto.response.LikeResponseDto;
 import com.sparta.instagramclone.dto.response.PostResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
+import com.sparta.instagramclone.repository.CommentRepository;
+import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +34,8 @@ import java.util.Optional;
 public class PostService {
     private final AwsS3Service awsS3Service;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Value("cloud.aws.s3.bucket")
@@ -60,7 +68,7 @@ public class PostService {
         return ResponseDto.success(
                 PostResponseDto.builder()
                         .id(post.getId())
-                        .author(post.getMember().getNickname())
+                        .nickname(post.getMember().getNickname())
                         .imgUrlList(post.getImgUrlList())
                         .content(post.getContent())
                         .createdAt(post.getCreatedAt())
@@ -103,7 +111,7 @@ public class PostService {
         return ResponseDto.success(
                 PostResponseDto.builder()
                         .id(post.getId())
-                        .author(post.getMember().getNickname())
+                        .nickname(post.getMember().getNickname())
                         .imgUrlList(post.getImgUrlList())
                         .content(post.getContent())
                         .createdAt(post.getCreatedAt())
@@ -138,6 +146,54 @@ public class PostService {
         postRepository.delete(post);
         return ResponseDto.success("delete success");
     }
+
+    @Transactional(readOnly = true)
+    public ResponseDto<?> getAllPosts() {
+        List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
+        List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+
+        for (Post post : postList) {
+            List<Comment> commentList = commentRepository.findAllByPost(post);
+            List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+            for (Comment comment : commentList) {
+                commentResponseDtoList.add(
+                        CommentResponseDto.builder()
+                                .id(comment.getId())
+                                .nickname(comment.getMember().getNickname())
+                                .content(comment.getContent())
+                                .postId(comment.getPost().getId())
+                                .memberId(comment.getMember().getId())
+                                .createdAt(comment.getCreatedAt())
+                                .modifiedAt(comment.getModifiedAt())
+                                .build()
+                );
+            }
+            List<Like> likeList = likeRepository.findByPost(post);
+            List<LikeResponseDto> likeResponseDtoList = new ArrayList<>();
+            for (Like like : likeList) {
+                likeResponseDtoList.add(
+                        LikeResponseDto.builder()
+                                .postId(like.getPost().getId())
+                                .memberId(like.getMember().getId())
+                                .build()
+                );
+            }
+            postResponseDtoList.add(
+                    PostResponseDto.builder()
+                            .id(post.getId())
+                            .nickname(post.getMember().getNickname())
+                            .content(post.getContent())
+                            .imgUrlList(post.getImgUrlList())
+                            .commentResponseDto(commentResponseDtoList)
+                            .likeResponseDto(likeResponseDtoList)
+                            .createdAt(post.getCreatedAt())
+                            .modifiedAt(post.getModifiedAt())
+                            .build()
+            );
+        }
+        return ResponseDto.success(postResponseDtoList);
+    }
+
 
     @Transactional
     public Member validateMember(HttpServletRequest request) {
