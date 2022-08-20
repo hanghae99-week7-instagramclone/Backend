@@ -4,6 +4,7 @@ import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.domain.Post;
 import com.sparta.instagramclone.dto.JwtTokenDto;
 import com.sparta.instagramclone.dto.request.PostRequestDto;
+import com.sparta.instagramclone.dto.response.MemberPostResponseDto;
 import com.sparta.instagramclone.dto.response.PostResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
@@ -19,9 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -69,6 +68,24 @@ public class PostService {
                         .build()
         );
     }
+
+    //유저 게시물 조회
+//    @Transactional
+//    public ResponseDto<?> getMemberPost(Long memberId, HttpServletRequest request){
+//        Set<Post> postList = postRepository.findAllByMember_Id(memberId);
+//        List<MemberPostResponseDto> memberPostResponseDtoList = new ArrayList<>();
+//        for(Post post : postList){
+//            memberPostResponseDtoList.add(
+//                    MemberPostResponseDto.builder()
+//                            .id(post.getId())
+//                            .content(post.getContent())
+//                            .imageUrlList(post.getImgUrlList())
+//                            .createdAt(post.getCreatedAt())
+//                            .modifiedAt((post.getModifiedAt()))
+//                            .build());
+//        }
+//        return ResponseDto.success(memberPostResponseDtoList);
+//    }
 
     @Transactional
     public Member validateMember(HttpServletRequest request) {

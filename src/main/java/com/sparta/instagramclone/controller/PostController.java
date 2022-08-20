@@ -6,9 +6,7 @@ import com.sparta.instagramclone.repository.PostRepository;
 import com.sparta.instagramclone.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,4 +29,9 @@ public class PostController {
         }
         return postService.createPost(multipartFile, postRequestDto, request);
     }
+
+//    @GetMapping(value = "/api/posts/member/{memberId}")
+//    public ResponseDto<?> memberPost(@PathVariable Long memberId, HttpServletRequest request){
+//        return postService.getMemberPost(memberId, request);
+//    }
 }
