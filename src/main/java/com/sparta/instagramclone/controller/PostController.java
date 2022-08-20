@@ -34,15 +34,15 @@ public class PostController {
     @GetMapping("/api/posts")
     public ResponseDto<?> getAllPost() {
         return postService.getAllPosts();
-
+    }
     //유저 게시글 조회
-    @GetMapping(value = "/api/posts/member/{memberId}")
+    @GetMapping("/api/posts/member/{memberId}")
     public ResponseDto<?> memberPost(@PathVariable Long memberId){
         return postService.getMemberPost(memberId);
     }
 
     //게시글 상세 조회
-    @GetMapping(value = "/api/posts/{postId}")
+    @GetMapping("/api/posts/{postId}")
     public ResponseDto<?> detailPost(@PathVariable Long postId, HttpServletRequest request){
         return postService.getDetailPost(postId, request);
 
