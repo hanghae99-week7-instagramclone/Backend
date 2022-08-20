@@ -9,7 +9,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import java.util.Optional;
+import java.util.Set;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
+    List<Post> findAllByMember_Id(Long memberId);
 
     List<String> findImgUrlListById(Long postId);
 }

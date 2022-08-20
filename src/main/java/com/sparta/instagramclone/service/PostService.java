@@ -1,12 +1,15 @@
 package com.sparta.instagramclone.service;
 
+import com.sparta.instagramclone.domain.Comment;
+import com.sparta.instagramclone.domain.Like;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.domain.Post;
 import com.sparta.instagramclone.dto.request.PostRequestDto;
-import com.sparta.instagramclone.dto.response.PostResponseDto;
-import com.sparta.instagramclone.dto.response.ResponseDto;
+import com.sparta.instagramclone.dto.response.*;
 import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
+import com.sparta.instagramclone.repository.CommentRepository;
+import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -28,6 +29,8 @@ import java.util.Optional;
 public class PostService {
     private final AwsS3Service awsS3Service;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final LikeRepository likeRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Value("cloud.aws.s3.bucket")
@@ -67,6 +70,79 @@ public class PostService {
                         .modifiedAt(post.getModifiedAt())
                         .build()
         );
+    }
+
+    //유저 게시물 조회
+    @Transactional
+    public ResponseDto<?> getMemberPost(Long memberId, HttpServletRequest request){
+        if (null == request.getHeader("Authorization")) {
+            return ResponseDto.fail("MEMBER_NOT_FOUND", "로그인이 필요합니다.");
+        }
+
+        Member member = validateMember(request);
+        if (null == member) {
+            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+        }
+        List<Post> postList = postRepository.findAllByMember_Id(memberId);
+        List<MemberPostResponseDto> memberPostResponseDtoList = new ArrayList<>();
+        log.info(String.valueOf(postList));
+        for(Post post : postList){
+            memberPostResponseDtoList.add(
+                    MemberPostResponseDto.builder()
+                            .id(post.getId())
+                            .content(post.getContent())
+                            .imageUrlList(post.getImgUrlList())
+                            .createdAt(post.getCreatedAt())
+                            .modifiedAt((post.getModifiedAt()))
+                            .build());
+        }
+        return ResponseDto.success(memberPostResponseDtoList);
+    }
+
+    //게시물 상세 조회
+    @Transactional
+    public ResponseDto<?> getDetailPost(Long postId, HttpServletRequest request){
+        if (null == request.getHeader("Authorization")) {
+            return ResponseDto.fail("MEMBER_NOT_FOUND", "로그인이 필요합니다.");
+        }
+
+        Member member = validateMember(request);
+        if (null == member) {
+            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
+        }
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            return ResponseDto.fail("NOT_FOUND", "게시글을 찾을 수 없습니다.");
+        }
+        List<Comment> commentList = commentRepository.findAllByPost_Id(postId);
+        List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+        for (Comment comment : commentList) {
+            commentResponseDtoList.add(CommentResponseDto.builder()
+                    .id(comment.getId())
+                    .content(comment.getContent())
+                    .createdAt(comment.getCreatedAt())
+                    .modifiedAt(comment.getModifiedAt())
+                    .postId(comment.getPost().getId())
+                    .memberId(comment.getMember().getId())
+                    .nickname(comment.getMember().getNickname())
+                    .build());
+        }
+
+        Optional<Like> likes = likeRepository.findByMemberAndPost_Id(member, postId);
+        boolean heartByMe;
+        heartByMe = null == likes;
+        return ResponseDto.success(DetailPostResponseDto.builder()
+                .id(post.get().getId())
+                .imgUrlList(post.get().getImgUrlList())
+                .author(post.get().getMember().getNickname())
+                .content(post.get().getContent())
+                .heartByMe(heartByMe)
+                .createdAt(post.get().getCreatedAt())
+                .modifiedAt(post.get().getModifiedAt())
+                .commentResponseDtoList(commentResponseDtoList)
+                .build());
+
+
     }
 
     @Transactional
