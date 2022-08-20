@@ -107,7 +107,7 @@ public class PostService {
         if (post.isEmpty()) {
             return ResponseDto.fail("NOT_FOUND", "게시글을 찾을 수 없습니다.");
         }
-        List<Comment> commentList = commentRepository.findAllByPost_Id(postId);
+        List<Comment> commentList = commentRepository.findAllByPostId(postId);
         List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
         for (Comment comment : commentList) {
             commentResponseDtoList.add(CommentResponseDto.builder()
@@ -133,9 +133,9 @@ public class PostService {
                     .commentResponseDtoList(commentResponseDtoList)
                     .build());
         }
-        Optional<Like> likes = likeRepository.findByMemberAndPost_Id(member, postId);
+        Optional<Like> likes = likeRepository.findByMemberAndPostId(member, postId);
         boolean heartByMe;
-        heartByMe = null == likes;
+        heartByMe = likes.isPresent();
         return ResponseDto.success(DetailPostResponseDto.builder()
                 .id(post.get().getId())
                 .imgUrlList(post.get().getImgUrlList())
