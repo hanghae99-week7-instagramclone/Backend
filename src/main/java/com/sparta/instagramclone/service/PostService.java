@@ -135,7 +135,7 @@ public class PostService {
         }
         Optional<Like> likes = likeRepository.findByMemberAndPost_Id(member, postId);
         boolean heartByMe;
-        heartByMe = null == likes;
+        heartByMe = likes.isPresent();
         return ResponseDto.success(DetailPostResponseDto.builder()
                 .id(post.get().getId())
                 .imgUrlList(post.get().getImgUrlList())
@@ -220,6 +220,7 @@ public class PostService {
         return ResponseDto.success("delete success");
     }
 
+    // 전체 게시물 조회
     @Transactional(readOnly = true)
     public ResponseDto<?> getAllPosts() {
         List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
