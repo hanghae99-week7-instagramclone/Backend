@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -36,9 +37,17 @@ public class Post extends Timestamped {
     @JoinColumn(name = "member_id")
     private Member member;
 
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Comment> comments;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Like> likes;
+
     public void update(PostRequestDto postRequestDto, List<String> imgUrlList) {
         this.content = postRequestDto.getContent();
-        this.imgUrlList = imgUrlList;
+        if (imgUrlList != null) {
+            this.imgUrlList = imgUrlList;
+        }
     }
 
     public boolean validateMember(Member member) {
