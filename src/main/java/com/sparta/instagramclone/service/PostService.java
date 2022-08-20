@@ -106,10 +106,6 @@ public class PostService {
             return ResponseDto.fail("MEMBER_NOT_FOUND", "로그인이 필요합니다.");
         }
 
-        Member member = validateMember(request);
-        if (null == member) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
         Optional<Post> post = postRepository.findById(postId);
         if (post.isEmpty()) {
             return ResponseDto.fail("NOT_FOUND", "게시글을 찾을 수 없습니다.");
@@ -128,6 +124,18 @@ public class PostService {
                     .build());
         }
 
+        Member member = validateMember(request);
+        if (null == member) {
+            return ResponseDto.success(DetailPostResponseDto.builder()
+                    .id(post.get().getId())
+                    .imgUrlList(post.get().getImgUrlList())
+                    .author(post.get().getMember().getNickname())
+                    .content(post.get().getContent())
+                    .createdAt(post.get().getCreatedAt())
+                    .modifiedAt(post.get().getModifiedAt())
+                    .commentResponseDtoList(commentResponseDtoList)
+                    .build());
+        }
         Optional<Like> likes = likeRepository.findByMemberAndPost_Id(member, postId);
         boolean heartByMe;
         heartByMe = null == likes;
