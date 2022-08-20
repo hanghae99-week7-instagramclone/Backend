@@ -74,15 +74,8 @@ public class PostService {
 
     //유저 게시물 조회
     @Transactional
-    public ResponseDto<?> getMemberPost(Long memberId, HttpServletRequest request){
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("MEMBER_NOT_FOUND", "로그인이 필요합니다.");
-        }
+    public ResponseDto<?> getMemberPost(Long memberId){
 
-        Member member = validateMember(request);
-        if (null == member) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
         List<Post> postList = postRepository.findAllByMember_Id(memberId);
         List<MemberPostResponseDto> memberPostResponseDtoList = new ArrayList<>();
         log.info(String.valueOf(postList));
@@ -102,9 +95,6 @@ public class PostService {
     //게시물 상세 조회
     @Transactional
     public ResponseDto<?> getDetailPost(Long postId, HttpServletRequest request){
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("MEMBER_NOT_FOUND", "로그인이 필요합니다.");
-        }
 
         Optional<Post> post = postRepository.findById(postId);
         if (post.isEmpty()) {
