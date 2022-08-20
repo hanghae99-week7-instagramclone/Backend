@@ -1,10 +1,12 @@
 package com.sparta.instagramclone.repository;
 
 import com.sparta.instagramclone.domain.Comment;
+import com.sparta.instagramclone.domain.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-        List<Comment> findAllByPost_Id(Long postId);
-        }
+    List<Comment> findAllByPost(Post post);
+}
+
