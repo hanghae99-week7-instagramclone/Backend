@@ -45,7 +45,7 @@ public class GlobalExceptionHandler {
     }
 
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = { IllegalArgumentException.class })
+    @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleApiRequestException(IllegalArgumentException ex) {
         Exception exception = new Exception();
         exception.setCode(HttpStatus.BAD_REQUEST);
@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = { NullPointerException.class })
+    @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Object> handleApiRequestException(NullPointerException ex) {
         Exception exception = new Exception();
         exception.setCode(HttpStatus.BAD_REQUEST);
