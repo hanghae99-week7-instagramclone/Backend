@@ -123,28 +123,28 @@ public class PostService {
 
         Member member = validateMember(request);
         if (null == member) {
-            return ResponseDto.success(DetailPostResponseDto.builder()
+            return ResponseDto.success(PostResponseDto.builder()
                     .id(post.get().getId())
                     .imgUrlList(post.get().getImgUrlList())
-                    .author(post.get().getMember().getNickname())
+                    .nickname(post.get().getMember().getNickname())
                     .content(post.get().getContent())
                     .createdAt(post.get().getCreatedAt())
                     .modifiedAt(post.get().getModifiedAt())
-                    .commentResponseDtoList(commentResponseDtoList)
+                    .commentResponseDto(commentResponseDtoList)
                     .build());
         }
         Optional<Like> likes = likeRepository.findByMemberAndPostId(member, postId);
         boolean heartByMe;
         heartByMe = likes.isPresent();
-        return ResponseDto.success(DetailPostResponseDto.builder()
+        return ResponseDto.success(PostResponseDto.builder()
                 .id(post.get().getId())
                 .imgUrlList(post.get().getImgUrlList())
-                .author(post.get().getMember().getNickname())
+                .nickname(post.get().getMember().getNickname())
                 .content(post.get().getContent())
                 .heartByMe(heartByMe)
                 .createdAt(post.get().getCreatedAt())
                 .modifiedAt(post.get().getModifiedAt())
-                .commentResponseDtoList(commentResponseDtoList)
+                .commentResponseDto(commentResponseDtoList)
                 .build());
 
 
@@ -220,6 +220,7 @@ public class PostService {
         return ResponseDto.success("delete success");
     }
 
+    // 전체 게시물 조회
     @Transactional(readOnly = true)
     public ResponseDto<?> getAllPosts() {
         List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
@@ -247,7 +248,7 @@ public class PostService {
                 likeResponseDtoList.add(
                         LikeResponseDto.builder()
                                 .postId(like.getPost().getId())
-                                .memberId(like.getMember().getId())
+                                .nickname(like.getMember().getNickname())
                                 .build()
                 );
             }
@@ -255,6 +256,7 @@ public class PostService {
                     PostResponseDto.builder()
                             .id(post.getId())
                             .nickname(post.getMember().getNickname())
+                            .profileUrl(post.getMember().getProfileUrl())
                             .content(post.getContent())
                             .imgUrlList(post.getImgUrlList())
                             .commentResponseDto(commentResponseDtoList)

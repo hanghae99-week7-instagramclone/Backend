@@ -11,16 +11,6 @@ public class FileUtils {
 
     private static final Tika tika = new Tika();
 
-//    public static File multipartFileToFile(MultipartFile multipartFile) {
-//        try {
-//            File file = new File(multipartFile.getOriginalFilename());
-//            multipartFile.transferTo(file);
-//            return file;
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//            return null;
-//        }
-//    }
 
     public static boolean validateImgFile(InputStream inputStream) {
         try {

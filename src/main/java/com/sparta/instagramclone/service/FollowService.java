@@ -4,6 +4,7 @@ import com.sparta.instagramclone.domain.Follow;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.FollowRequestDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
+import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.FollowRepository;
 import com.sparta.instagramclone.repository.MemberRepository;
@@ -24,8 +25,9 @@ public class FollowService {
     @Transactional
     public ResponseDto<?> upDownFollow(Long toMemberId, HttpServletRequest request) {
         if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("MEMBER_NOT_FOUND",
-                    "로그인이 필요합니다.");
+//            return ResponseDto.fail("MEMBER_NOT_FOUND",
+//                    "로그인이 필요합니다.");
+            throw new MemberNotFoundException();
         }
 
         Member fromMember = validateMember(request);
