@@ -102,7 +102,6 @@ public class PostService {
     //게시물 상세 조회
     @Transactional
     public ResponseDto<?> getDetailPost(Long postId, HttpServletRequest request){
-
         Optional<Post> post = postRepository.findById(postId);
         if (post.isEmpty()) {
             return ResponseDto.fail("NOT_FOUND", "게시글을 찾을 수 없습니다.");

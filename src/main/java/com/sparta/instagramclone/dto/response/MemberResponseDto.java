@@ -11,6 +11,7 @@ public class MemberResponseDto {
     private String email;
     private String nickname;
     private String username;
+    private String profileUrl;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
@@ -19,6 +20,7 @@ public class MemberResponseDto {
         this.email = member.getEmail();
         this.nickname = member.getNickname();
         this.username = member.getUsername();
+        this.profileUrl = member.getProfileUrl();
         this.createdAt = member.getCreatedAt();
         this.modifiedAt = member.getModifiedAt();
     }

@@ -8,6 +8,7 @@ import com.sparta.instagramclone.dto.response.CommentResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.CommentRepository;
+import com.sparta.instagramclone.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -22,10 +25,9 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class CommentService {
-
+    private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final JwtTokenProvider jwtTokenProvider;
-
     private final PostService postService;
 
     @Transactional
@@ -104,6 +106,28 @@ public class CommentService {
                         .nickname(member.getNickname())
                         .build()
         );
+    }
+
+    @Transactional
+    public ResponseDto<?> getComments(Long postId) {
+        Optional<Post> post = postRepository.findById(postId);
+        if (post.isEmpty()) {
+            return ResponseDto.fail("NOT_FOUND", "게시글을 찾을 수 없습니다.");
+        }
+        List<Comment> commentList = commentRepository.findAllByPostId(postId);
+        List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
+        for (Comment comment : commentList) {
+            commentResponseDtoList.add(CommentResponseDto.builder()
+                    .id(comment.getId())
+                    .content(comment.getContent())
+                    .createdAt(comment.getCreatedAt())
+                    .modifiedAt(comment.getModifiedAt())
+                    .postId(comment.getPost().getId())
+                    .memberId(comment.getMember().getId())
+                    .nickname(comment.getMember().getNickname())
+                    .build());
+        }
+        return ResponseDto.success(commentResponseDtoList);
     }
 
     @Transactional
