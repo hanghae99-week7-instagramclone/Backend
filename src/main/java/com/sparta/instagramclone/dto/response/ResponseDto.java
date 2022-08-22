@@ -13,7 +13,7 @@ public class ResponseDto<T> {
     private Error error;
 
     public static <T> ResponseDto<T> success(T data) {
-        return new ResponseDto<>(true, data, null);
+        return new ResponseDto<>(true, data, new Error("200", "성공하였습니다."));
     }
 
     public static <T> ResponseDto<T> fail(String code, String message) {
