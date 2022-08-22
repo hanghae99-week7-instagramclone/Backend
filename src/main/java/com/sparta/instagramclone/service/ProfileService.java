@@ -3,7 +3,6 @@ package com.sparta.instagramclone.service;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
-import com.sparta.instagramclone.dto.response.MemberResponseDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
@@ -49,6 +48,9 @@ public class ProfileService {
                 amazonS3Client.deleteObject(bucket, key);
             }
             profileUrl = awsS3Service.upload(file);
+            if (profileUrl.equals("false")) {
+                return ResponseDto.fail("NOT_IMAGE_FILE", "이미지 파일만 업로드 가능합니다.");
+            }
             member.updateProfile(profileRequestDto, profileUrl);
         } else {
             member.updateProfile(profileRequestDto, null);
