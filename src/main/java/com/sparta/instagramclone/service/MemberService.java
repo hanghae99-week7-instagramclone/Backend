@@ -30,8 +30,6 @@ public class MemberService {
     // 회원가입
     @Transactional
     public ResponseDto<?> registerMember(MemberRequestDto memberRequestDto) {
-        String password = passwordEncoder.encode(memberRequestDto.getPassword());
-
         if (!memberRequestDto.getPassword().equals(memberRequestDto.getPasswordConfirm())) {
             throw new PasswordNotCollectException();
         }
@@ -70,9 +68,6 @@ public class MemberService {
     // 이메일 중복 체크
     @Transactional(readOnly = true)
     public boolean checkDuplicateEmail(String email) {
-        if (email.isEmpty()) {
-            throw new IllegalArgumentException("이메일을 입력해주세요.");
-        }
         if (memberRepository.countByEmail(email) != 0) {
             return false;
         }
@@ -82,9 +77,6 @@ public class MemberService {
     // 닉네임 중복 체크
     @Transactional(readOnly = true)
     public boolean checkDuplicateNickname(String nickname) {
-        if (nickname.isEmpty()) {
-            throw new IllegalArgumentException("닉네임을 입력해주세요.");
-        }
         if (memberRepository.countByNickname(nickname) != 0) {
             return false;
         }

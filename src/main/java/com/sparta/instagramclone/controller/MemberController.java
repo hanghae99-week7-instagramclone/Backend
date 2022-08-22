@@ -6,10 +6,8 @@ import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -35,6 +33,7 @@ public class MemberController {
     public ResponseDto<?> getAllMembers() {
         return memberService.getAllMembers();
     }
+
     @GetMapping("/members/email-check")
     public ResponseDto<?> checkDuplicateEmail(String email) {
         return ResponseDto.success(memberService.checkDuplicateEmail(email));
@@ -43,6 +42,5 @@ public class MemberController {
     @GetMapping("/members/nickname-check")
     public ResponseDto<?> checkDuplicateNickname(String nickname) {
         return ResponseDto.success(memberService.checkDuplicateNickname(nickname));
-
     }
 }
