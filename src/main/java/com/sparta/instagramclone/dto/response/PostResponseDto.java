@@ -14,8 +14,10 @@ import java.util.List;
 @AllArgsConstructor
 public class PostResponseDto {
     private Long id;
+    private String profileUrl;
     private String nickname;
     private String content;
+    private Boolean heartByMe;
     private List<String> imgUrlList;
     private List<CommentResponseDto> commentResponseDto;
     private List<LikeResponseDto> likeResponseDto;
