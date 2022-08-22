@@ -74,7 +74,7 @@ public class MemberService {
             throw new IllegalArgumentException("이메일을 입력해주세요.");
         }
         if (memberRepository.countByEmail(email) != 0) {
-            throw new DuplicateEmailException();
+            return false;
         }
         return true;
     }
@@ -86,7 +86,7 @@ public class MemberService {
             throw new IllegalArgumentException("닉네임을 입력해주세요.");
         }
         if (memberRepository.countByNickname(nickname) != 0) {
-            throw new DuplicateNicknameException();
+            return false;
         }
         return true;
     }
