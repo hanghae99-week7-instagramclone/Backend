@@ -8,17 +8,17 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Builder
-@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostResponseDto {
+@Builder
+@Getter
+public class DetailPostResponseDto {
     private Long id;
-    private String nickname;
-    private String content;
     private List<String> imgUrlList;
-    private List<CommentResponseDto> commentResponseDto;
-    private List<LikeResponseDto> likeResponseDto;
+    private String author;
+    private String content;
+    private Boolean heartByMe;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+    private List<CommentResponseDto> commentResponseDtoList;
 }
