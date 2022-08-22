@@ -3,11 +3,10 @@ package com.sparta.instagramclone.service;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
-import com.sparta.instagramclone.dto.response.MemberResponseDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
-import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.MemberRepository;
+import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,25 +22,18 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
-    private final JwtTokenProvider jwtTokenProvider;
     private final AwsS3Service awsS3Service;
     private final AmazonS3Client amazonS3Client;
-
     private final MemberRepository memberRepository;
+    private final Verification verification;
 
     @Value("cloud.aws.s3.bucket")
     private String bucket;
 
     @Transactional
     public ResponseDto<?> updateProfile(ProfileRequestDto profileRequestDto, MultipartFile file, HttpServletRequest request) throws IOException {
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("MEMBER_NOT_FOUND", "로그인이 필요합니다.");
-        }
-
-        Member member = validateMember(request);
-        if (null == member) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+        Member member = verification.validateMember(request);
+        verification.tokenCheck(request, member);
 
         String profileUrl;
         if (file != null) {
@@ -65,14 +57,6 @@ public class ProfileService {
                 .username(member.getUsername())
                 .websiteUrl(member.getWebsiteUrl())
                 .build());
-    }
-
-    @Transactional
-    public Member validateMember(HttpServletRequest request) {
-        if (!jwtTokenProvider.validateToken(request.getHeader("Authorization").substring(7))) {
-            return null;
-        }
-        return jwtTokenProvider.getMemberFromAuthentication();
     }
 
     @Transactional
