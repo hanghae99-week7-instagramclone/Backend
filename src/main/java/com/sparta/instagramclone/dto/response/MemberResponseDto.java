@@ -8,19 +8,19 @@ import java.time.LocalDateTime;
 @Getter
 public class MemberResponseDto {
     private Long id;
-    private String profileUrl;
     private String email;
     private String nickname;
     private String username;
+    private String profileUrl;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
     public MemberResponseDto(Member member) {
         this.id = member.getId();
-        this.profileUrl = member.getProfileUrl();
         this.email = member.getEmail();
         this.nickname = member.getNickname();
         this.username = member.getUsername();
+        this.profileUrl = member.getProfileUrl();
         this.createdAt = member.getCreatedAt();
         this.modifiedAt = member.getModifiedAt();
     }
