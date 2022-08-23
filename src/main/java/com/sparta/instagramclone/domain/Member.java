@@ -14,7 +14,7 @@ import javax.validation.constraints.Email;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member extends Timestamped{
+public class Member extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

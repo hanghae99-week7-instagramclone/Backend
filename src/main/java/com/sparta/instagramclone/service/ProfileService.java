@@ -1,6 +1,5 @@
 package com.sparta.instagramclone.service;
 
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
@@ -44,7 +43,6 @@ public class ProfileService {
         }
 
         Member member = verification.getCurrentMember(memberId);
-
         String profileUrl;
         if (file != null) {
             if (member.getProfileUrl() != null) {
@@ -58,15 +56,15 @@ public class ProfileService {
         }
 
         return ResponseDto.success(ProfileResponseDto.builder()
-                .bio(member.getBio())
-                .createdAt(member.getCreatedAt())
                 .id(member.getId())
+                .bio(member.getBio())
                 .email(member.getEmail())
-                .modifiedAt(member.getModifiedAt())
                 .profileUrl(member.getProfileUrl())
                 .nickname(member.getNickname())
                 .username(member.getUsername())
                 .websiteUrl(member.getWebsiteUrl())
+                .modifiedAt(member.getModifiedAt())
+                .createdAt(member.getCreatedAt())
                 .build());
     }
 
