@@ -6,13 +6,13 @@ import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.domain.Post;
 import com.sparta.instagramclone.dto.request.PostRequestDto;
 import com.sparta.instagramclone.dto.response.*;
+import com.sparta.instagramclone.handler.ex.NotAuthorException;
 import com.sparta.instagramclone.repository.CommentRepository;
 import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.PostRepository;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -225,6 +225,7 @@ public class PostService {
         Post post = verification.getCurrentPost(postId);
         verification.checkPost(post);
         verification.checkPostAuthor(member, post);
+
 
         List<String> deleteImgList = post.getImgUrlList();
         for (String img : deleteImgList) {
