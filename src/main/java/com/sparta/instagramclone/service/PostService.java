@@ -117,7 +117,7 @@ public class PostService {
                     .commentResponseDto(commentResponseDtoList)
                     .build());
         }
-        Optional<Like> likes = likeRepository.findByMemberAndPostId(member, postId);
+        Optional<Like> likes = likeRepository.findByMemberAndPost(member, post);
         boolean heartByMe;
         heartByMe = likes.isPresent();
         return ResponseDto.success(PostResponseDto.builder()
@@ -134,9 +134,10 @@ public class PostService {
 
     // 전체 게시물 조회
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllPosts() {
-        List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
+    public ResponseDto<?> getAllPosts(HttpServletRequest request) {
+        List<Post> postList = postRepository.findAllByOrderByCreatedAtDesc();
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+        Member member = verification.validateMember(request);
 
         for (Post post : postList) {
             List<Comment> commentList = commentRepository.findAllByPost(post);
@@ -164,12 +165,16 @@ public class PostService {
                                 .build()
                 );
             }
+            Optional<Like> likes = likeRepository.findByMemberAndPost(member, post);
+            boolean heartByMe;
+            heartByMe = likes.isPresent();
             postResponseDtoList.add(
                     PostResponseDto.builder()
                             .id(post.getId())
                             .nickname(post.getMember().getNickname())
                             .profileUrl(post.getMember().getProfileUrl())
                             .content(post.getContent())
+                            .heartByMe(heartByMe)
                             .imgUrlList(post.getImgUrlList())
                             .commentResponseDto(commentResponseDtoList)
                             .likeResponseDto(likeResponseDtoList)
