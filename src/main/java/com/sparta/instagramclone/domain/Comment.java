@@ -4,7 +4,6 @@ import com.sparta.instagramclone.dto.request.CommentRequestDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.util.Lazy;
 
 import javax.persistence.*;
 
@@ -33,9 +32,9 @@ public class Comment extends Timestamped {
     }
 
     public boolean validateMember(Member member) {
-        return !this.member.equals(member);
+        return !this.member.getId().equals(member.getId());
     }
-    @Builder
+    //@Builder
     public Comment(String content, Member member, Post post){
         this.content = content;
         this.member = member;

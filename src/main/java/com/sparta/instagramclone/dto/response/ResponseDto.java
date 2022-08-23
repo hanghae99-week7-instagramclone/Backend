@@ -10,19 +10,19 @@ import lombok.NoArgsConstructor;
 public class ResponseDto<T> {
     private boolean success;
     private T data;
-    private Error error;
+    private Status status;
 
     public static <T> ResponseDto<T> success(T data) {
-        return new ResponseDto<>(true, data, null);
+        return new ResponseDto<>(true, data, new Status("200", "정상적으로 처리되었습니다."));
     }
 
     public static <T> ResponseDto<T> fail(String code, String message) {
-        return new ResponseDto<>(false, null, new Error(code, message));
+        return new ResponseDto<>(false, null, new Status(code, message));
     }
 
     @Getter
     @AllArgsConstructor
-    static class Error {
+    static class Status {
         private String code;
         private String message;
     }

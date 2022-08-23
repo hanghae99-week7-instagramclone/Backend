@@ -19,23 +19,26 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comments")
-    public ResponseDto<?> createComment (@RequestBody CommentRequestDto commentRequestDto, @PathVariable Long postId, HttpServletRequest request){
+    public ResponseDto<?> createComment(@RequestBody CommentRequestDto commentRequestDto, @PathVariable Long postId, HttpServletRequest request){
         return commentService.createComment(commentRequestDto, postId, request);
     }
 
+    @GetMapping("/comments")
+    public ResponseDto<?> getComments(@PathVariable Long postId) {
+        return commentService.getComments(postId);
+    }
+
     @PutMapping("/comments/{commentId}")
-    public ResponseDto<?> updateComment(@RequestBody CommentRequestDto commentRequestDto, @PathVariable Map<String, Long> pathVarMap, HttpServletRequest request){
-        Long postId = pathVarMap.get("postId");
-        Long commentId = pathVarMap.get("commentId");
-        log.info(postId.toString());
-        log.info(commentId.toString());
+    public ResponseDto<?> updateComment(@RequestBody CommentRequestDto commentRequestDto, @PathVariable Map<String, String> pathVarMap, HttpServletRequest request){
+        Long postId = Long.parseLong(pathVarMap.get("postId"));
+        Long commentId = Long.parseLong(pathVarMap.get("commentId"));
         return commentService.updateComment(commentRequestDto, postId, commentId, request);
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public ResponseDto<?> deleteComment (@PathVariable Map<String, Long> pathVarMap, HttpServletRequest request) {
-        Long postId = pathVarMap.get("postId");
-        Long commentId = pathVarMap.get("commentId");
+    public ResponseDto<?> deleteComment (@PathVariable Map<String, String> pathVarMap, HttpServletRequest request) {
+        Long postId = Long.parseLong(pathVarMap.get("postId"));
+        Long commentId = Long.parseLong(pathVarMap.get("commentId"));
         return commentService.deleteComment(postId,commentId, request);
     }
 }

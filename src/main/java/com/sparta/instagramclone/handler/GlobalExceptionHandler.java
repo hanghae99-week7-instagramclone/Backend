@@ -44,8 +44,31 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(NotFoundPostException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundPostException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND_POST.getCode(), ErrorCode.NOT_FOUND_POST.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = { IllegalArgumentException.class })
+    @ExceptionHandler(NotFoundCommentException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundCommentException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_FOUND_COMMENT.getCode(), ErrorCode.NOT_FOUND_COMMENT.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotAuthorException.class)
+    public ResponseEntity<ErrorResponse> handleNotAuthorException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.NOT_AUTHOR.getCode(), ErrorCode.NOT_AUTHOR.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TokenExpiredException.class)
+    public ResponseEntity<ErrorResponse> handleTokenExpiredException() {
+        return new ResponseEntity<>(new ErrorResponse(ErrorCode.TOKEN_EXPIRED.getCode(), ErrorCode.TOKEN_EXPIRED.getMessage()),
+                HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Object> handleApiRequestException(IllegalArgumentException ex) {
         Exception exception = new Exception();
         exception.setCode(HttpStatus.BAD_REQUEST);
@@ -57,7 +80,7 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler(value = { NullPointerException.class })
+    @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<Object> handleApiRequestException(NullPointerException ex) {
         Exception exception = new Exception();
         exception.setCode(HttpStatus.BAD_REQUEST);
@@ -69,3 +92,4 @@ public class GlobalExceptionHandler {
         );
     }
 }
+

@@ -8,4 +8,7 @@ import java.util.Optional;
 
 public interface FollowRepository extends JpaRepository<Follow, Long> {
     Optional<Follow> findByFromMemberAndToMember_Id(Member member, Long postId);
+    Long countToMemberIdByFromMemberId(Long fromMemberId);
+    Long countFromMemberIdByToMemberId(Long toMemberId);
+
 }

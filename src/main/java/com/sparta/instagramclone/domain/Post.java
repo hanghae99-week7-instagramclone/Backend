@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.util.List;
+import java.util.Set;
 
 @Builder
 @Getter
@@ -22,7 +23,11 @@ public class Post extends Timestamped {
 
     // 다중 이미지
     @Column(columnDefinition = "mediumblob")
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "post_img_url_list",
+            joinColumns = @JoinColumn(name = "post_id")
+    )
     private List<String> imgUrlList;
 
     private String content;
@@ -32,12 +37,20 @@ public class Post extends Timestamped {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    public void update(PostRequestDto postRequestDto, List<String> imgUrl) {
-        this.imgUrlList = imgUrl;
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Comment> comments;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Like> likes;
+
+    public void update(PostRequestDto postRequestDto, List<String> imgUrlList) {
         this.content = postRequestDto.getContent();
+        if (imgUrlList != null) {
+            this.imgUrlList = imgUrlList;
+        }
     }
 
     public boolean validateMember(Member member) {
-        return !this.member.equals(member);
+        return !this.member.getId().equals(member.getId());
     }
 }

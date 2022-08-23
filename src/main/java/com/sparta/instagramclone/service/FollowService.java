@@ -4,9 +4,9 @@ import com.sparta.instagramclone.domain.Follow;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.FollowRequestDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
-import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.FollowRepository;
 import com.sparta.instagramclone.repository.MemberRepository;
+import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,22 +16,14 @@ import javax.servlet.http.HttpServletRequest;
 @RequiredArgsConstructor
 @Service
 public class FollowService {
-    private final JwtTokenProvider jwtTokenProvider;
     private final FollowRepository followRepository;
     private final MemberRepository memberRepository;
-    private final LikeService likeService;
+    private final Verification verification;
 
     @Transactional
     public ResponseDto<?> upDownFollow(Long toMemberId, HttpServletRequest request) {
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("MEMBER_NOT_FOUND",
-                    "로그인이 필요합니다.");
-        }
-
-        Member fromMember = validateMember(request);
-        if (null == fromMember) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+        Member fromMember = verification.validateMember(request);
+        verification.tokenCheck(request, fromMember);
 
         Member toMember = memberRepository.findById(toMemberId).orElse(null);
         if (null == toMember){
@@ -39,8 +31,6 @@ public class FollowService {
         }
 
         Follow findFollowing = followRepository.findByFromMemberAndToMember_Id(fromMember,toMemberId).orElse(null);
-
-
 
         if(findFollowing == null){
             FollowRequestDto followRequestDto = new FollowRequestDto(fromMember, toMember);
@@ -52,11 +42,5 @@ public class FollowService {
             return ResponseDto.success(false);
         }
     }
-    @javax.transaction.Transactional
-    public Member validateMember(HttpServletRequest request) {
-        if (!jwtTokenProvider.validateToken(request.getHeader("Authorization").substring(7))) {
-            return null;
-        }
-        return jwtTokenProvider.getMemberFromAuthentication();
-    }
+
 }
