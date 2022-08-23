@@ -6,7 +6,6 @@ import com.sparta.instagramclone.domain.Post;
 import com.sparta.instagramclone.handler.ex.*;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.CommentRepository;
-import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.MemberRepository;
 import com.sparta.instagramclone.repository.PostRepository;
 import lombok.RequiredArgsConstructor;

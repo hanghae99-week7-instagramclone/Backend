@@ -1,8 +1,10 @@
 package com.sparta.instagramclone.domain;
 
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
-import lombok.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
@@ -12,7 +14,7 @@ import javax.validation.constraints.Email;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member extends Timestamped{
+public class Member extends Timestamped {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,7 +49,9 @@ public class Member extends Timestamped{
         if (profileRequestDto.getNickname() != null) {
             this.nickname = profileRequestDto.getNickname();
         }
-        this.profileUrl = profileUrl;
+        if (profileUrl != null) {
+            this.profileUrl = profileUrl;
+        }
         if (profileRequestDto.getWebsiteUrl() != null) {
             this.websiteUrl = profileRequestDto.getWebsiteUrl();
         }

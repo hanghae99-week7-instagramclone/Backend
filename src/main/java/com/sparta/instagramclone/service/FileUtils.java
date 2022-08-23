@@ -14,7 +14,7 @@ public class FileUtils {
 
     public static boolean validateImgFile(InputStream inputStream) {
         try {
-            List<String> notValidTypeList = Arrays.asList("image/jpeg", "image/pjpeg", "image/png", "image/gif", "image/bmp", "image/x-windows-bmp");
+            List<String> notValidTypeList = Arrays.asList("image/webp", "image/jpeg", "image/pjpeg", "image/png", "image/gif", "image/bmp", "image/x-windows-bmp");
 
             String mimeType = tika.detect(inputStream);
             System.out.println("MimeType : " + mimeType);

@@ -34,9 +34,6 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final Verification verification;
 
-    @Value("cloud.aws.s3.bucket")
-    private String bucket;
-
     @Transactional
     public ResponseDto<?> createPost(List<MultipartFile> multipartFile, PostRequestDto postRequestDto, HttpServletRequest request) throws IOException {
         Member member = verification.validateMember(request);
@@ -120,7 +117,7 @@ public class PostService {
                     .commentResponseDto(commentResponseDtoList)
                     .build());
         }
-        Optional<Like> likes = likeRepository.findByMemberAndPostId(member, postId);
+        Optional<Like> likes = likeRepository.findByMemberAndPost(member, post);
         boolean heartByMe;
         heartByMe = likes.isPresent();
         return ResponseDto.success(PostResponseDto.builder()
@@ -137,9 +134,10 @@ public class PostService {
 
     // 전체 게시물 조회
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllPosts() {
-        List<Post> postList = postRepository.findAllByOrderByModifiedAtDesc();
+    public ResponseDto<?> getAllPosts(HttpServletRequest request) {
+        List<Post> postList = postRepository.findAllByOrderByCreatedAtDesc();
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+        Member member = verification.validateMember(request);
 
         for (Post post : postList) {
             List<Comment> commentList = commentRepository.findAllByPost(post);
@@ -167,12 +165,16 @@ public class PostService {
                                 .build()
                 );
             }
+            Optional<Like> likes = likeRepository.findByMemberAndPost(member, post);
+            boolean heartByMe;
+            heartByMe = likes.isPresent();
             postResponseDtoList.add(
                     PostResponseDto.builder()
                             .id(post.getId())
                             .nickname(post.getMember().getNickname())
                             .profileUrl(post.getMember().getProfileUrl())
                             .content(post.getContent())
+                            .heartByMe(heartByMe)
                             .imgUrlList(post.getImgUrlList())
                             .commentResponseDto(commentResponseDtoList)
                             .likeResponseDto(likeResponseDtoList)
@@ -196,9 +198,8 @@ public class PostService {
         if (multipartFile != null) {
             for (MultipartFile imgFile : multipartFile) {
                 String imgUrl = awsS3Service.upload(imgFile);
-                //String imgUrl = URLDecoder.decode(fileName, "UTF-8");
                 if (imgUrl.equals("false")) {
-                    return ResponseDto.fail("NOT_IMAGE_FILE", "이미지 파일만 업로드 가능합니다.");
+                    throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
                 }
                 imgUrlList.add(imgUrl);
                 post.update(postRequestDto, imgUrlList);

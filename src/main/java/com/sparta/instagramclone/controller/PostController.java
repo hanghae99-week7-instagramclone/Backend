@@ -32,8 +32,8 @@ public class PostController {
 
     //게시글 전체 조회
     @GetMapping("/api/posts")
-    public ResponseDto<?> getAllPost() {
-        return postService.getAllPosts();
+    public ResponseDto<?> getAllPost(HttpServletRequest request) {
+        return postService.getAllPosts(request);
     }
     //유저 게시글 조회
     @GetMapping("/api/posts/member/{memberId}")
