@@ -32,11 +32,7 @@ public class CommentService {
         Post post = verification.getCurrentPost(postId);
         verification.checkPost(post);
 
-        Comment comment = Comment.builder()
-                .content(commentRequestDto.getContent())
-                .member(member)
-                .post(post)
-                .build();
+        Comment comment = new Comment(commentRequestDto.getContent(), member, post);
         commentRepository.save(comment);
         return ResponseDto.success(
                 CommentResponseDto.builder()

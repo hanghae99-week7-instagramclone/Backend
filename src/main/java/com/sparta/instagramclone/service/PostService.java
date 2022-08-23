@@ -34,9 +34,6 @@ public class PostService {
     private final LikeRepository likeRepository;
     private final Verification verification;
 
-    @Value("cloud.aws.s3.bucket")
-    private String bucket;
-
     @Transactional
     public ResponseDto<?> createPost(List<MultipartFile> multipartFile, PostRequestDto postRequestDto, HttpServletRequest request) throws IOException {
         Member member = verification.validateMember(request);
@@ -196,9 +193,8 @@ public class PostService {
         if (multipartFile != null) {
             for (MultipartFile imgFile : multipartFile) {
                 String imgUrl = awsS3Service.upload(imgFile);
-                //String imgUrl = URLDecoder.decode(fileName, "UTF-8");
                 if (imgUrl.equals("false")) {
-                    return ResponseDto.fail("NOT_IMAGE_FILE", "이미지 파일만 업로드 가능합니다.");
+                    throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
                 }
                 imgUrlList.add(imgUrl);
                 post.update(postRequestDto, imgUrlList);
