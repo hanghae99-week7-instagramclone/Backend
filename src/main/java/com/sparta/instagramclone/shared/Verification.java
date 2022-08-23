@@ -35,11 +35,11 @@ public class Verification {
     }
 
     public void checkPostAuthor(Member member, Post post) {
-        if (!post.getMember().equals(member)) throw new NotAuthorException();
+        if (!post.getMember().getId().equals(member.getId())) throw new NotAuthorException();
     }
 
     public void checkCommentAuthor(Member member, Comment comment) {
-        if (!comment.getMember().equals(member)) throw new NotAuthorException();
+        if (!comment.getMember().getId().equals(member.getId())) throw new NotAuthorException();
     }
 
     public void tokenCheck(HttpServletRequest request, Member member) {
