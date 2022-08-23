@@ -79,9 +79,9 @@ public class SecurityConfig {
         return source;
     }
 
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return (web) -> web.ignoring()
-//                .antMatchers("/h2-console/**", "/favicon.ico");
-//    }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring()
+                .antMatchers("/h2-console/**", "/favicon.ico");
+    }
 }
