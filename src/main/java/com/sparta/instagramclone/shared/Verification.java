@@ -9,6 +9,7 @@ import com.sparta.instagramclone.repository.CommentRepository;
 import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.MemberRepository;
 import com.sparta.instagramclone.repository.PostRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +68,7 @@ public class Verification {
     @Transactional
     public Member validateMember(HttpServletRequest request) {
         if (!jwtTokenProvider.validateToken(request.getHeader("Authorization").substring(7))) {
-            return null;
+            throw new TokenExpiredException();
         }
         return jwtTokenProvider.getMemberFromAuthentication();
     }

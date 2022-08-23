@@ -6,7 +6,8 @@ import com.sparta.instagramclone.dto.request.LoginRequestDto;
 import com.sparta.instagramclone.dto.request.MemberRequestDto;
 import com.sparta.instagramclone.dto.response.MemberResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
-import com.sparta.instagramclone.handler.ex.*;
+import com.sparta.instagramclone.handler.ex.EmailNotFoundException;
+import com.sparta.instagramclone.handler.ex.PasswordNotCollectException;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

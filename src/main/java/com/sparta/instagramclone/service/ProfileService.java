@@ -5,12 +5,14 @@ import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
+import com.sparta.instagramclone.handler.ex.DuplicateNicknameException;
 import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
+import com.sparta.instagramclone.repository.FollowRepository;
 import com.sparta.instagramclone.repository.MemberRepository;
+import com.sparta.instagramclone.repository.PostRepository;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,12 +26,10 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ProfileService {
     private final AwsS3Service awsS3Service;
-    private final AmazonS3Client amazonS3Client;
     private final MemberRepository memberRepository;
+    private final FollowRepository followRepository;
+    private final PostRepository postRepository;
     private final Verification verification;
-
-    @Value("cloud.aws.s3.bucket")
-    private String bucket;
 
     @Transactional
     public ResponseDto<?> updateProfile(Long memberId, ProfileRequestDto profileRequestDto, MultipartFile file, HttpServletRequest request) throws IOException {
@@ -40,7 +40,7 @@ public class ProfileService {
             throw new IllegalArgumentException("자신의 프로필이 아닙니다.");
         }
         if (memberRepository.countByNickname(profileRequestDto.getNickname()) != 0) {
-            return ResponseDto.fail("BAD_REQUEST", "존재하는 닉네임입니다.");
+            throw new DuplicateNicknameException();
         }
 
         Member member = verification.getCurrentMember(memberId);
@@ -49,13 +49,12 @@ public class ProfileService {
         if (file != null) {
             if (member.getProfileUrl() != null) {
                 String key = member.getProfileUrl().substring("https://mini-spring-bucket-team7.s3.ap-northeast-2.amazonaws.com/".length());
-                amazonS3Client.deleteObject(bucket, key);
+                awsS3Service.deleteS3(key);
             }
             profileUrl = awsS3Service.upload(file);
             member.updateProfile(profileRequestDto, profileUrl);
         } else {
-            profileUrl = member.getProfileUrl();
-            member.updateProfile(profileRequestDto, profileUrl);
+            member.updateProfile(profileRequestDto, null);
         }
 
         return ResponseDto.success(ProfileResponseDto.builder()
@@ -83,11 +82,14 @@ public class ProfileService {
                     .nickname(member.get().getNickname())
                     .username(member.get().getUsername())
                     .websiteUrl(member.get().getWebsiteUrl())
+                    .postCount(postRepository.countByMemberId(memberId))
+                    .follower(followRepository.countFromMemberIdByToMemberId(memberId))
+                    .follow(followRepository.countToMemberIdByFromMemberId(memberId))
                     .createdAt(member.get().getCreatedAt())
                     .modifiedAt(member.get().getModifiedAt())
                     .build());
 
         }
-        return ResponseDto.fail("MEMBER_NOT_FOUND", "사용자를 찾을 수 없습니다.");
+        throw new MemberNotFoundException();
     }
 }
