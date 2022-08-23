@@ -7,6 +7,7 @@ import com.sparta.instagramclone.handler.ex.*;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.CommentRepository;
 import com.sparta.instagramclone.repository.LikeRepository;
+import com.sparta.instagramclone.repository.MemberRepository;
 import com.sparta.instagramclone.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -20,11 +21,8 @@ import java.util.Optional;
 public class Verification {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final MemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
-
-    public void checkMember(Member member) {
-        if (member == null) throw new MemberNotFoundException();
-    }
 
     public void checkPost(Post post) {
         if (post == null) throw new NotFoundPostException();
@@ -42,9 +40,16 @@ public class Verification {
         if (!comment.getMember().getId().equals(member.getId())) throw new NotAuthorException();
     }
 
+
     public void tokenCheck(HttpServletRequest request, Member member) {
         if (request.getHeader("Authorization") == null) throw new TokenExpiredException();
         if (member == null) throw new MemberNotFoundException();
+    }
+
+    @Transactional(readOnly = true)
+    public Member getCurrentMember(Long id) {
+        Optional<Member> optionalMember = memberRepository.findById(id);
+        return optionalMember.orElse(null);
     }
 
     @Transactional(readOnly = true)

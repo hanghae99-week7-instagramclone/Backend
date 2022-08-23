@@ -5,6 +5,7 @@ import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
+import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
 import com.sparta.instagramclone.repository.MemberRepository;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +32,18 @@ public class ProfileService {
     private String bucket;
 
     @Transactional
-    public ResponseDto<?> updateProfile(ProfileRequestDto profileRequestDto, MultipartFile file, HttpServletRequest request) throws IOException {
-        Member member = verification.validateMember(request);
-        verification.tokenCheck(request, member);
+    public ResponseDto<?> updateProfile(Long memberId, ProfileRequestDto profileRequestDto, MultipartFile file, HttpServletRequest request) throws IOException {
+        Member checkMember = verification.validateMember(request);
+        verification.tokenCheck(request, checkMember);
+
+        if (!checkMember.getId().equals(memberId)) {
+            throw new IllegalArgumentException("자신의 프로필이 아닙니다.");
+        }
+        if (memberRepository.countByNickname(profileRequestDto.getNickname()) != 0) {
+            return ResponseDto.fail("BAD_REQUEST", "존재하는 닉네임입니다.");
+        }
+
+        Member member = verification.getCurrentMember(memberId);
 
         String profileUrl;
         if (file != null) {
@@ -44,8 +54,10 @@ public class ProfileService {
             profileUrl = awsS3Service.upload(file);
             member.updateProfile(profileRequestDto, profileUrl);
         } else {
-            member.updateProfile(profileRequestDto, null);
+            profileUrl = member.getProfileUrl();
+            member.updateProfile(profileRequestDto, profileUrl);
         }
+
         return ResponseDto.success(ProfileResponseDto.builder()
                 .bio(member.getBio())
                 .createdAt(member.getCreatedAt())
@@ -64,15 +76,15 @@ public class ProfileService {
         Optional<Member> member = memberRepository.findById(memberId);
         if (member.isPresent()) {
             return ResponseDto.success(ProfileResponseDto.builder()
-                    .bio(member.get().getBio())
-                    .createdAt(member.get().getCreatedAt())
                     .id(member.get().getId())
+                    .bio(member.get().getBio())
                     .email(member.get().getEmail())
-                    .modifiedAt(member.get().getModifiedAt())
                     .profileUrl(member.get().getProfileUrl())
                     .nickname(member.get().getNickname())
                     .username(member.get().getUsername())
                     .websiteUrl(member.get().getWebsiteUrl())
+                    .createdAt(member.get().getCreatedAt())
+                    .modifiedAt(member.get().getModifiedAt())
                     .build());
 
         }

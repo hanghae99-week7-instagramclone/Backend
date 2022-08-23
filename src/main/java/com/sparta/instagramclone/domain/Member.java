@@ -40,13 +40,19 @@ public class Member extends Timestamped{
     @Column
     private String websiteUrl;
 
-    public void updateProfile(ProfileRequestDto profileRequestDto, String profileUrl){
-        this.nickname = profileRequestDto.getNickname();
-        this.websiteUrl = profileRequestDto.getWebsiteUrl();
-        this.bio = profileRequestDto.getBio();
-        this.email = profileRequestDto.getEmail();
-        if(profileUrl != null){
-            this.profileUrl =  profileUrl;
+    public void updateProfile(ProfileRequestDto profileRequestDto, String profileUrl) {
+        if (profileRequestDto.getUsername() != null) {
+            this.username = profileRequestDto.getUsername();
+        }
+        if (profileRequestDto.getNickname() != null) {
+            this.nickname = profileRequestDto.getNickname();
+        }
+        this.profileUrl = profileUrl;
+        if (profileRequestDto.getWebsiteUrl() != null) {
+            this.websiteUrl = profileRequestDto.getWebsiteUrl();
+        }
+        if (profileRequestDto.getBio() != null) {
+            this.bio = profileRequestDto.getBio();
         }
     }
 
