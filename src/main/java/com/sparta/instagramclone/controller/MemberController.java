@@ -6,6 +6,10 @@ import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
@@ -42,5 +46,11 @@ public class MemberController {
     @GetMapping("/members/nickname-check")
     public ResponseDto<?> checkDuplicateNickname(String nickname) {
         return ResponseDto.success(memberService.checkDuplicateNickname(nickname));
+    }
+
+    //무한스크롤
+    @GetMapping("/members/infinite")
+    public ResponseDto<?> getinfiniteMembers(@PageableDefault(size = 10) @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        return memberService.getInfiniteMembers(pageable);
     }
 }

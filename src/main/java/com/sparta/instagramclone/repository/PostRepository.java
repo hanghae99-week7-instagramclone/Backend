@@ -11,5 +11,5 @@ import java.util.Set;
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAllByOrderByModifiedAtDesc();
     List<Post> findAllByMember_Id(Long memberId);
-    List<String> findImgUrlListById(Long postId);
+    Long countByMemberId(Long memberId);
 }
