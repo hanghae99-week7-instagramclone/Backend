@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ProfileResponseDto {
-
     private Long id;
     private String email;
     private String nickname;
