@@ -16,6 +16,9 @@ public class ProfileResponseDto {
     private String profileUrl;
     private String bio;
     private String websiteUrl;
+    private Long postCount;
+    private Long follower;
+    private Long follow;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 }
