@@ -12,7 +12,6 @@ import com.sparta.instagramclone.repository.PostRepository;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -90,6 +89,7 @@ public class PostService {
     @Transactional
     public ResponseDto<?> getDetailPost(Long postId, HttpServletRequest request){
         Post post = verification.getCurrentPost(postId);
+        Member member = verification.validateMember(request);
         verification.checkPost(post);
         List<Comment> commentList = commentRepository.findAllByPostId(postId);
         List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
@@ -105,30 +105,29 @@ public class PostService {
                     .build());
         }
 
-        Member member = verification.validateMember(request);
-        if (null == member) {
-            return ResponseDto.success(PostResponseDto.builder()
-                    .id(post.getId())
-                    .imgUrlList(post.getImgUrlList())
-                    .nickname(post.getMember().getNickname())
-                    .content(post.getContent())
-                    .createdAt(post.getCreatedAt())
-                    .modifiedAt(post.getModifiedAt())
-                    .commentResponseDto(commentResponseDtoList)
-                    .build());
+        List<Like> likeList = likeRepository.findByPost(post);
+        List<LikeResponseDto> likeResponseDtoList = new ArrayList<>();
+        for (Like like : likeList) {
+            likeResponseDtoList.add(
+                    LikeResponseDto.builder()
+                            .postId(like.getPost().getId())
+                            .nickname(like.getMember().getNickname())
+                            .build()
+            );
         }
         Optional<Like> likes = likeRepository.findByMemberAndPost(member, post);
         boolean heartByMe;
         heartByMe = likes.isPresent();
         return ResponseDto.success(PostResponseDto.builder()
                 .id(post.getId())
-                .imgUrlList(post.getImgUrlList())
                 .nickname(post.getMember().getNickname())
                 .content(post.getContent())
                 .heartByMe(heartByMe)
+                .imgUrlList(post.getImgUrlList())
+                .commentResponseDto(commentResponseDtoList)
+                .likeResponseDto(likeResponseDtoList)
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
-                .commentResponseDto(commentResponseDtoList)
                 .build());
     }
 
@@ -225,6 +224,7 @@ public class PostService {
         Post post = verification.getCurrentPost(postId);
         verification.checkPost(post);
         verification.checkPostAuthor(member, post);
+
 
         List<String> deleteImgList = post.getImgUrlList();
         for (String img : deleteImgList) {

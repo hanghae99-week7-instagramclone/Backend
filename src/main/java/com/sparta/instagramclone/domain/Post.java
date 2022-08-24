@@ -50,7 +50,4 @@ public class Post extends Timestamped {
         }
     }
 
-    public boolean validateMember(Member member) {
-        return !this.member.getId().equals(member.getId());
-    }
 }
