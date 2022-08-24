@@ -1,5 +1,7 @@
 package com.sparta.instagramclone.service;
 
+import com.sparta.instagramclone.domain.Follow;
+import com.sparta.instagramclone.domain.Like;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
@@ -38,8 +40,10 @@ public class ProfileService {
         if (!checkMember.getId().equals(memberId)) {
             throw new IllegalArgumentException("자신의 프로필이 아닙니다.");
         }
-        if (memberRepository.countByNickname(profileRequestDto.getNickname()) != 0) {
-            throw new DuplicateNicknameException();
+        if (!profileRequestDto.getNickname().equals(checkMember.getNickname())) {
+            if (memberRepository.countByNickname(profileRequestDto.getNickname()) != 0) {
+                throw new DuplicateNicknameException();
+            }
         }
 
         Member member = verification.getCurrentMember(memberId);
@@ -69,23 +73,29 @@ public class ProfileService {
     }
 
     @Transactional
-    public ResponseDto<?> getProfile(Long memberId) {
-        Optional<Member> member = memberRepository.findById(memberId);
-        if (member.isPresent()) {
-            return ResponseDto.success(ProfileResponseDto.builder()
-                    .id(member.get().getId())
-                    .bio(member.get().getBio())
-                    .email(member.get().getEmail())
-                    .profileUrl(member.get().getProfileUrl())
-                    .nickname(member.get().getNickname())
-                    .username(member.get().getUsername())
-                    .websiteUrl(member.get().getWebsiteUrl())
-                    .postCount(postRepository.countByMemberId(memberId))
-                    .follower(followRepository.countFromMemberIdByToMemberId(memberId))
-                    .follow(followRepository.countToMemberIdByFromMemberId(memberId))
-                    .createdAt(member.get().getCreatedAt())
-                    .modifiedAt(member.get().getModifiedAt())
-                    .build());
+    public ResponseDto<?> getProfile(Long memberId, HttpServletRequest request) {
+        Member member = verification.getCurrentMember(memberId);
+        Member currentMember = verification.validateMember(request);
+        Optional<Follow> optionalFollow = followRepository.findByFromMemberAndToMember_Id(currentMember, memberId);
+        boolean followByMe;
+        followByMe = optionalFollow.isPresent();
+        if (member != null) {
+            return ResponseDto.success(
+                    ProfileResponseDto.builder()
+                        .id(member.getId())
+                        .bio(member.getBio())
+                        .email(member.getEmail())
+                        .profileUrl(member.getProfileUrl())
+                        .nickname(member.getNickname())
+                        .username(member.getUsername())
+                        .websiteUrl(member.getWebsiteUrl())
+                        .postCount(postRepository.countByMemberId(memberId))
+                        .follower(followRepository.countFromMemberIdByToMemberId(memberId))
+                        .follow(followRepository.countToMemberIdByFromMemberId(memberId))
+                            .followByMe(followByMe)
+                        .createdAt(member.getCreatedAt())
+                        .modifiedAt(member.getModifiedAt())
+                        .build());
 
         }
         throw new MemberNotFoundException();
