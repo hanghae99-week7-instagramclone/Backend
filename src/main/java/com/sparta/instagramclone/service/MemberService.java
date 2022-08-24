@@ -6,19 +6,19 @@ import com.sparta.instagramclone.dto.request.LoginRequestDto;
 import com.sparta.instagramclone.dto.request.MemberRequestDto;
 import com.sparta.instagramclone.dto.response.MemberResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
-import com.sparta.instagramclone.handler.ex.*;
+import com.sparta.instagramclone.handler.ex.EmailNotFoundException;
+import com.sparta.instagramclone.handler.ex.PasswordNotCollectException;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +30,6 @@ public class MemberService {
     // 회원가입
     @Transactional
     public ResponseDto<?> registerMember(MemberRequestDto memberRequestDto) {
-        String password = passwordEncoder.encode(memberRequestDto.getPassword());
-
         if (!memberRequestDto.getPassword().equals(memberRequestDto.getPasswordConfirm())) {
             throw new PasswordNotCollectException();
         }
@@ -70,9 +68,6 @@ public class MemberService {
     // 이메일 중복 체크
     @Transactional(readOnly = true)
     public boolean checkDuplicateEmail(String email) {
-        if (email.isEmpty()) {
-            throw new IllegalArgumentException("이메일을 입력해주세요.");
-        }
         if (memberRepository.countByEmail(email) != 0) {
             return false;
         }
@@ -82,9 +77,6 @@ public class MemberService {
     // 닉네임 중복 체크
     @Transactional(readOnly = true)
     public boolean checkDuplicateNickname(String nickname) {
-        if (nickname.isEmpty()) {
-            throw new IllegalArgumentException("닉네임을 입력해주세요.");
-        }
         if (memberRepository.countByNickname(nickname) != 0) {
             return false;
         }
@@ -101,5 +93,40 @@ public class MemberService {
             );
         }
         return ResponseDto.success(memberResponseDtoList);
+    }
+
+    //무한스크롤
+//    @Transactional(readOnly = true)
+//    public ResponseDto<?> getInfiniteMembers(Pageable pageable){
+//        Slice<Member> memberSlice = memberRepository.findAll(pageable);
+//        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
+//        for (Member member : memberSlice){
+//            memberResponseDtoList.add(
+//                    new MemberResponseDto(member)
+//            );
+//        }
+//        boolean hasNext = false;
+//        if (memberResponseDtoList.size() > pageable.getPageSize()) {
+//            memberResponseDtoList.remove(pageable.getPageSize());
+//            hasNext = true;
+//        }
+//        return ResponseDto.success(new SliceImpl<>(memberResponseDtoList, pageable, hasNext));
+//    }
+    @Transactional(readOnly = true)
+    public ResponseDto<?> getInfiniteMembers(Pageable pageable){
+        PageRequest pageRequest = PageRequest.of(0,10,Sort.by(Sort.Direction.DESC, "id"));
+        Slice<Member> page = memberRepository.findAll(pageRequest);
+        List<MemberResponseDto> memberResponseDtoList = new ArrayList<>();
+        for (Member member : page){
+            memberResponseDtoList.add(
+                    new MemberResponseDto(member)
+            );
+        }
+        boolean hasNext = false;
+        if (memberResponseDtoList.size() > pageable.getPageSize()) {
+            memberResponseDtoList.remove(pageable.getPageSize());
+            hasNext = true;
+        }
+        return ResponseDto.success(new SliceImpl<>(memberResponseDtoList, pageable, hasNext));
     }
 }

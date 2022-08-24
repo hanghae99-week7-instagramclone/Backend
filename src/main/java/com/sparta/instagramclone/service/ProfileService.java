@@ -5,11 +5,14 @@ import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
-import com.sparta.instagramclone.jwt.JwtTokenProvider;
+import com.sparta.instagramclone.handler.ex.DuplicateNicknameException;
+import com.sparta.instagramclone.handler.ex.MemberNotFoundException;
+import com.sparta.instagramclone.repository.FollowRepository;
 import com.sparta.instagramclone.repository.MemberRepository;
+import com.sparta.instagramclone.repository.PostRepository;
+import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,30 +25,31 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ProfileService {
-    private final JwtTokenProvider jwtTokenProvider;
     private final AwsS3Service awsS3Service;
-    private final AmazonS3Client amazonS3Client;
     private final MemberRepository memberRepository;
-
-    @Value("cloud.aws.s3.bucket")
-    private String bucket;
+    private final FollowRepository followRepository;
+    private final PostRepository postRepository;
+    private final Verification verification;
 
     @Transactional
-    public ResponseDto<?> updateProfile(ProfileRequestDto profileRequestDto, MultipartFile file, HttpServletRequest request) throws IOException {
-        if (null == request.getHeader("Authorization")) {
-            return ResponseDto.fail("MEMBER_NOT_FOUND", "로그인이 필요합니다.");
+    public ResponseDto<?> updateProfile(Long memberId, ProfileRequestDto profileRequestDto, MultipartFile file, HttpServletRequest request) throws IOException {
+        Member checkMember = verification.validateMember(request);
+        verification.tokenCheck(request, checkMember);
+
+        if (!checkMember.getId().equals(memberId)) {
+            throw new IllegalArgumentException("자신의 프로필이 아닙니다.");
+        }
+        if (memberRepository.countByNickname(profileRequestDto.getNickname()) != 0) {
+            throw new DuplicateNicknameException();
         }
 
-        Member member = validateMember(request);
-        if (null == member) {
-            return ResponseDto.fail("INVALID_TOKEN", "Token이 유효하지 않습니다.");
-        }
+        Member member = verification.getCurrentMember(memberId);
 
         String profileUrl;
         if (file != null) {
             if (member.getProfileUrl() != null) {
                 String key = member.getProfileUrl().substring("https://mini-spring-bucket-team7.s3.ap-northeast-2.amazonaws.com/".length());
-                amazonS3Client.deleteObject(bucket, key);
+                awsS3Service.deleteS3(key);
             }
             profileUrl = awsS3Service.upload(file);
             if (profileUrl.equals("false")) {
@@ -55,6 +59,7 @@ public class ProfileService {
         } else {
             member.updateProfile(profileRequestDto, null);
         }
+
         return ResponseDto.success(ProfileResponseDto.builder()
                 .bio(member.getBio())
                 .createdAt(member.getCreatedAt())
@@ -69,30 +74,25 @@ public class ProfileService {
     }
 
     @Transactional
-    public Member validateMember(HttpServletRequest request) {
-        if (!jwtTokenProvider.validateToken(request.getHeader("Authorization").substring(7))) {
-            return null;
-        }
-        return jwtTokenProvider.getMemberFromAuthentication();
-    }
-
-    @Transactional
     public ResponseDto<?> getProfile(Long memberId) {
         Optional<Member> member = memberRepository.findById(memberId);
         if (member.isPresent()) {
             return ResponseDto.success(ProfileResponseDto.builder()
-                    .bio(member.get().getBio())
-                    .createdAt(member.get().getCreatedAt())
                     .id(member.get().getId())
+                    .bio(member.get().getBio())
                     .email(member.get().getEmail())
-                    .modifiedAt(member.get().getModifiedAt())
                     .profileUrl(member.get().getProfileUrl())
                     .nickname(member.get().getNickname())
                     .username(member.get().getUsername())
                     .websiteUrl(member.get().getWebsiteUrl())
+                    .postCount(postRepository.countByMemberId(memberId))
+                    .follower(followRepository.countFromMemberIdByToMemberId(memberId))
+                    .follow(followRepository.countToMemberIdByFromMemberId(memberId))
+                    .createdAt(member.get().getCreatedAt())
+                    .modifiedAt(member.get().getModifiedAt())
                     .build());
 
         }
-        return ResponseDto.fail("MEMBER_NOT_FOUND", "사용자를 찾을 수 없습니다.");
+        throw new MemberNotFoundException();
     }
 }

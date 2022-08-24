@@ -6,6 +6,10 @@ import com.sparta.instagramclone.repository.PostRepository;
 import com.sparta.instagramclone.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,8 +36,8 @@ public class PostController {
 
     //게시글 전체 조회
     @GetMapping("/api/posts")
-    public ResponseDto<?> getAllPost() {
-        return postService.getAllPosts();
+    public ResponseDto<?> getAllPost(@RequestParam Long lastPostId) {
+        return postService.getAllPosts(lastPostId);
     }
     //유저 게시글 조회
     @GetMapping("/api/posts/member/{memberId}")
