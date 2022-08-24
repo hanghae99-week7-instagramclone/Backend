@@ -2,7 +2,6 @@ package com.sparta.instagramclone.dto.response;
 
 import com.sparta.instagramclone.domain.Comment;
 import com.sparta.instagramclone.domain.Like;
-import com.sparta.instagramclone.domain.Post;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +15,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostResponseDto {
+public class PostInfiniteScrollResponseDto {
     private Long id;
     private String profileUrl;
     private String nickname;
@@ -24,8 +23,8 @@ public class PostResponseDto {
     private String content;
     private Boolean heartByMe;
     private List<String> imgUrlList;
-    private List<CommentResponseDto> commentResponseDto;
-    private List<LikeResponseDto> likeResponseDto;
+    private Set<Comment> comments;
+    private Set<Like> likes;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 
