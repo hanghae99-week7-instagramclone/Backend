@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.util.Objects;
 
 @Builder
 @Entity
@@ -41,6 +43,18 @@ public class Member extends Timestamped {
 
     @Column
     private String websiteUrl;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) {
+            return false;
+        }
+        Member member = (Member) o;
+        return id != null && Objects.equals(id, member.id);
+    }
 
     public void updateProfile(ProfileRequestDto profileRequestDto, String profileUrl) {
         if (profileRequestDto.getUsername() != null) {
