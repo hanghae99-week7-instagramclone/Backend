@@ -1,10 +1,17 @@
 package com.sparta.instagramclone.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIncludeProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sparta.instagramclone.dto.request.LikeRequestDto;
 import com.sparta.instagramclone.dto.request.PostRequestDto;
+import com.sparta.instagramclone.dto.response.CommentResponseDto;
+import com.sparta.instagramclone.dto.response.LikeResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 
 import javax.persistence.*;
 import java.util.List;
@@ -38,6 +45,7 @@ public class Post extends Timestamped {
     private Member member;
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Set<Comment> comments;
 
     @OneToMany(mappedBy = "post", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)

@@ -1,5 +1,7 @@
 package com.sparta.instagramclone.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +18,7 @@ import java.util.Objects;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"createdAt", "modifiedAt"})
 public class Member extends Timestamped {
 
     @Id
@@ -24,24 +27,30 @@ public class Member extends Timestamped {
 
     @Column(nullable = false)
     @Email
+    @JsonIgnore
     private String email;
 
     @Column(nullable = false)
     private String nickname;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String username;
 
     @Column(nullable = false)
+    @JsonIgnore
     private String password;
 
     @Column
+    @JsonIgnore
     private String profileUrl;
 
     @Column
+    @JsonIgnore
     private String bio;
 
     @Column
+    @JsonIgnore
     private String websiteUrl;
 
     @Override
