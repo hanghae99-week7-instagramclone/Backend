@@ -6,10 +6,8 @@ import com.sparta.instagramclone.domain.Post;
 import com.sparta.instagramclone.handler.ex.*;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
 import com.sparta.instagramclone.repository.CommentRepository;
-import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.MemberRepository;
 import com.sparta.instagramclone.repository.PostRepository;
-import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -35,13 +33,16 @@ public class Verification {
     }
 
     public void checkPostAuthor(Member member, Post post) {
+<<<<<<< HEAD
         log.info(post.getMember().toString());
         log.info(member.toString());
+=======
+>>>>>>> da0bc9040d5401d4f90703c96a0df1b53eeb9b96
         if (!post.getMember().equals(member)) throw new NotAuthorException();
     }
 
     public void checkCommentAuthor(Member member, Comment comment) {
-        if (!comment.getMember().getId().equals(member.getId())) throw new NotAuthorException();
+        if (!comment.getMember().equals(member)) throw new NotAuthorException();
     }
 
 
@@ -71,7 +72,7 @@ public class Verification {
     @Transactional
     public Member validateMember(HttpServletRequest request) {
         if (!jwtTokenProvider.validateToken(request.getHeader("Authorization").substring(7))) {
-            throw new TokenExpiredException();
+            return null;
         }
         return jwtTokenProvider.getMemberFromAuthentication();
     }

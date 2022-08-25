@@ -9,6 +9,7 @@ import com.sparta.instagramclone.dto.response.*;
 import com.sparta.instagramclone.repository.CommentRepository;
 import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.PostRepository;
+import com.sparta.instagramclone.repository.PostRepositoryImpl;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -37,6 +36,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
     private final Verification verification;
+    private final PostRepositoryImpl postRepositoryImpl;
 
     @Transactional
     public ResponseDto<?> createPost(List<MultipartFile> multipartFile, PostRequestDto postRequestDto, HttpServletRequest request) throws IOException {
@@ -94,6 +94,7 @@ public class PostService {
     @Transactional
     public ResponseDto<?> getDetailPost(Long postId, HttpServletRequest request){
         Post post = verification.getCurrentPost(postId);
+        Member member = verification.validateMember(request);
         verification.checkPost(post);
         List<Comment> commentList = commentRepository.findAllByPostId(postId);
         List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
@@ -109,42 +110,42 @@ public class PostService {
                     .build());
         }
 
-        Member member = verification.validateMember(request);
-        if (null == member) {
-            return ResponseDto.success(PostResponseDto.builder()
-                    .id(post.getId())
-                    .imgUrlList(post.getImgUrlList())
-                    .nickname(post.getMember().getNickname())
-                    .content(post.getContent())
-                    .createdAt(post.getCreatedAt())
-                    .modifiedAt(post.getModifiedAt())
-                    .commentResponseDto(commentResponseDtoList)
-                    .build());
+        List<Like> likeList = likeRepository.findByPost(post);
+        List<LikeResponseDto> likeResponseDtoList = new ArrayList<>();
+        for (Like like : likeList) {
+            likeResponseDtoList.add(
+                    LikeResponseDto.builder()
+                            .postId(like.getPost().getId())
+                            .nickname(like.getMember().getNickname())
+                            .build()
+            );
         }
-        Optional<Like> likes = likeRepository.findByMemberAndPostId(member, postId);
+        Optional<Like> likes = likeRepository.findByMemberAndPost(member, post);
         boolean heartByMe;
         heartByMe = likes.isPresent();
         return ResponseDto.success(PostResponseDto.builder()
                 .id(post.getId())
-                .imgUrlList(post.getImgUrlList())
                 .nickname(post.getMember().getNickname())
+                .authorId(post.getMember().getId())
                 .content(post.getContent())
                 .heartByMe(heartByMe)
+                .imgUrlList(post.getImgUrlList())
+                .commentResponseDto(commentResponseDtoList)
+                .likeResponseDto(likeResponseDtoList)
                 .createdAt(post.getCreatedAt())
                 .modifiedAt(post.getModifiedAt())
-                .commentResponseDto(commentResponseDtoList)
                 .build());
     }
 
     // 전체 게시물 조회
     @Transactional(readOnly = true)
-    public ResponseDto<?> getAllPosts(Long lastPostId) {
-        PageRequest pageRequest = PageRequest.of(0, 5);
-        Slice<Post> postList = postRepository.findAllByIdLessThanOrderByCreatedAtDesc(lastPostId, pageRequest);
+    public ResponseDto<?> getAllPosts(HttpServletRequest request) {
+        List<Post> postList = postRepository.findAllByOrderByCreatedAtDesc();
         List<PostResponseDto> postResponseDtoList = new ArrayList<>();
+        Member member = verification.validateMember(request);
 
         for (Post post : postList) {
-            List<Comment> commentList = commentRepository.findAllByPost(post);
+            List<Comment> commentList = commentRepository.findAllByPostId(post.getId());
             List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
             for (Comment comment : commentList) {
                 commentResponseDtoList.add(
@@ -169,12 +170,17 @@ public class PostService {
                                 .build()
                 );
             }
+            Optional<Like> likes = likeRepository.findByMemberAndPost(member, post);
+            boolean heartByMe;
+            heartByMe = likes.isPresent();
             postResponseDtoList.add(
                     PostResponseDto.builder()
                             .id(post.getId())
                             .nickname(post.getMember().getNickname())
+                            .authorId(post.getMember().getId())
                             .profileUrl(post.getMember().getProfileUrl())
                             .content(post.getContent())
+                            .heartByMe(heartByMe)
                             .imgUrlList(post.getImgUrlList())
                             .commentResponseDto(commentResponseDtoList)
                             .likeResponseDto(likeResponseDtoList)
@@ -229,6 +235,7 @@ public class PostService {
         verification.checkPost(post);
         verification.checkPostAuthor(member, post);
 
+
         List<String> deleteImgList = post.getImgUrlList();
         for (String img : deleteImgList) {
             log.info(img);
@@ -240,4 +247,7 @@ public class PostService {
         return ResponseDto.success("delete success");
     }
 
+    public Slice<PostInfiniteScrollResponseDto> getAllPostInfinite(Pageable pageable) {
+        return postRepositoryImpl.getPostScroll(pageable);
+    }
 }

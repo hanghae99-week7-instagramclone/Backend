@@ -1,15 +1,16 @@
 package com.sparta.instagramclone.controller;
 
 import com.sparta.instagramclone.dto.request.PostRequestDto;
+import com.sparta.instagramclone.dto.response.PostInfiniteScrollResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.repository.PostRepository;
 import com.sparta.instagramclone.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
+import org.springframework.data.domain.Slice;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,8 +37,8 @@ public class PostController {
 
     //게시글 전체 조회
     @GetMapping("/api/posts")
-    public ResponseDto<?> getAllPost(@RequestParam Long lastPostId) {
-        return postService.getAllPosts(lastPostId);
+    public ResponseDto<?> getAllPost(HttpServletRequest request) {
+        return postService.getAllPosts(request);
     }
     //유저 게시글 조회
     @GetMapping("/api/posts/member/{memberId}")
@@ -63,4 +64,10 @@ public class PostController {
     public ResponseDto<?> deletePost(@PathVariable Long postId, HttpServletRequest request) {
         return postService.deletePost(postId, request);
     }
+
+    @GetMapping("/api/posts/infinite-scroll")
+    public ResponseEntity<Slice<PostInfiniteScrollResponseDto>> getAllPostInfinite(Pageable pageable) {
+        return new ResponseEntity<>(postService.getAllPostInfinite(pageable), HttpStatus.OK);
+    }
+
 }

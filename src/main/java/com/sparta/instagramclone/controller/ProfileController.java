@@ -22,7 +22,7 @@ public class ProfileController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseDto<?> getProfile(@PathVariable Long memberId){
-        return profileService.getProfile(memberId);
+    public ResponseDto<?> getProfile(@PathVariable Long memberId, HttpServletRequest request){
+        return profileService.getProfile(memberId, request);
     }
 }
