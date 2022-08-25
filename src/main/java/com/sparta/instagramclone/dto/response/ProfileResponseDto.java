@@ -19,6 +19,7 @@ public class ProfileResponseDto {
     private Long postCount;
     private Long follower;
     private Long follow;
+    private boolean followByMe;
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
 }
