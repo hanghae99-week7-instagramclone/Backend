@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -30,15 +31,15 @@ public class FollowService {
             return ResponseDto.fail("NOT_FOUND", "존재하지 않는 사용자 id 입니다.");
         }
 
-        Follow findFollowing = followRepository.findByFromMemberAndToMember_Id(fromMember,toMemberId).orElse(null);
+        Optional<Follow> findFollowing = followRepository.findByFromMemberAndToMember_Id(fromMember,toMemberId);
 
-        if(findFollowing == null){
+        if(findFollowing.isEmpty()){
             FollowRequestDto followRequestDto = new FollowRequestDto(fromMember, toMember);
             Follow follow = new Follow(followRequestDto);
             followRepository.save(follow);
             return ResponseDto.success(true);
         } else {
-            followRepository.deleteById(findFollowing.getId());
+            followRepository.deleteById(findFollowing.get().getId());
             return ResponseDto.success(false);
         }
     }

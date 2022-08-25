@@ -4,19 +4,16 @@ import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.sparta.instagramclone.domain.*;
+import com.sparta.instagramclone.domain.Like;
+import com.sparta.instagramclone.domain.Member;
+import com.sparta.instagramclone.domain.Post;
+import com.sparta.instagramclone.domain.QPost;
 import com.sparta.instagramclone.dto.response.PostInfiniteScrollResponseDto;
-import com.sparta.instagramclone.dto.response.PostResponseDto;
 import com.sparta.instagramclone.jwt.JwtTokenProvider;
-import com.sparta.instagramclone.repository.LikeRepository;
-import com.sparta.instagramclone.repository.PostRepositoryCustom;
-import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.criterion.Projection;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +38,7 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
                 .from(post)
                 .orderBy(PostSort(pageable))
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
+                .limit(pageable.getPageSize()+1)
                 .fetch();
         List<PostInfiniteScrollResponseDto> content = new ArrayList<>();
 
