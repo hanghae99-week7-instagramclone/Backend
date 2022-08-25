@@ -9,9 +9,12 @@ import com.sparta.instagramclone.dto.response.*;
 import com.sparta.instagramclone.repository.CommentRepository;
 import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.PostRepository;
+import com.sparta.instagramclone.repository.PostRepositoryImpl;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,9 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -32,6 +33,7 @@ public class PostService {
     private final CommentRepository commentRepository;
     private final LikeRepository likeRepository;
     private final Verification verification;
+    private final PostRepositoryImpl postRepositoryImpl;
 
     @Transactional
     public ResponseDto<?> createPost(List<MultipartFile> multipartFile, PostRequestDto postRequestDto, HttpServletRequest request) throws IOException {
@@ -121,6 +123,7 @@ public class PostService {
         return ResponseDto.success(PostResponseDto.builder()
                 .id(post.getId())
                 .nickname(post.getMember().getNickname())
+                .authorId(post.getMember().getId())
                 .content(post.getContent())
                 .heartByMe(heartByMe)
                 .imgUrlList(post.getImgUrlList())
@@ -139,7 +142,7 @@ public class PostService {
         Member member = verification.validateMember(request);
 
         for (Post post : postList) {
-            List<Comment> commentList = commentRepository.findAllByPost(post);
+            List<Comment> commentList = commentRepository.findAllByPostId(post.getId());
             List<CommentResponseDto> commentResponseDtoList = new ArrayList<>();
             for (Comment comment : commentList) {
                 commentResponseDtoList.add(
@@ -171,6 +174,7 @@ public class PostService {
                     PostResponseDto.builder()
                             .id(post.getId())
                             .nickname(post.getMember().getNickname())
+                            .authorId(post.getMember().getId())
                             .profileUrl(post.getMember().getProfileUrl())
                             .content(post.getContent())
                             .heartByMe(heartByMe)
@@ -237,4 +241,7 @@ public class PostService {
         return ResponseDto.success("delete success");
     }
 
+    public Slice<PostInfiniteScrollResponseDto> getAllPostInfinite(Pageable pageable) {
+        return postRepositoryImpl.getPostScroll(pageable);
+    }
 }

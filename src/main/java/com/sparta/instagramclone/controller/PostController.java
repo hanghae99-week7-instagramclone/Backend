@@ -1,11 +1,17 @@
 package com.sparta.instagramclone.controller;
 
 import com.sparta.instagramclone.dto.request.PostRequestDto;
+import com.sparta.instagramclone.dto.response.PostInfiniteScrollResponseDto;
+import com.sparta.instagramclone.dto.response.PostResponseDto;
 import com.sparta.instagramclone.dto.response.ResponseDto;
 import com.sparta.instagramclone.repository.PostRepository;
 import com.sparta.instagramclone.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -59,4 +65,10 @@ public class PostController {
     public ResponseDto<?> deletePost(@PathVariable Long postId, HttpServletRequest request) {
         return postService.deletePost(postId, request);
     }
+
+    @GetMapping("/api/posts/infinite-scroll")
+    public ResponseEntity<Slice<PostInfiniteScrollResponseDto>> getAllPostInfinite(Pageable pageable) {
+        return new ResponseEntity<>(postService.getAllPostInfinite(pageable), HttpStatus.OK);
+    }
+
 }

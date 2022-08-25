@@ -12,6 +12,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -34,8 +35,8 @@ public class MemberController {
     }
 
     @GetMapping("/members")
-    public ResponseDto<?> getAllMembers() {
-        return memberService.getAllMembers();
+    public ResponseDto<?> getAllMembers(HttpServletRequest request) {
+        return memberService.getAllMembers(request);
     }
 
     @GetMapping("/members/email-check")
