@@ -1,7 +1,6 @@
 package com.sparta.instagramclone.service;
 
 import com.sparta.instagramclone.domain.Follow;
-import com.sparta.instagramclone.domain.Like;
 import com.sparta.instagramclone.domain.Member;
 import com.sparta.instagramclone.dto.request.ProfileRequestDto;
 import com.sparta.instagramclone.dto.response.ProfileResponseDto;
@@ -92,7 +91,7 @@ public class ProfileService {
                         .postCount(postRepository.countByMemberId(memberId))
                         .follower(followRepository.countFromMemberIdByToMemberId(memberId))
                         .follow(followRepository.countToMemberIdByFromMemberId(memberId))
-                            .followByMe(followByMe)
+                        .followByMe(followByMe)
                         .createdAt(member.getCreatedAt())
                         .modifiedAt(member.getModifiedAt())
                         .build());

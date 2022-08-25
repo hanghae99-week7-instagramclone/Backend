@@ -1,7 +1,8 @@
-package com.sparta.instagramclone.service;
+package com.sparta.instagramclone.repository;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.sparta.instagramclone.domain.*;
 import com.sparta.instagramclone.dto.response.PostInfiniteScrollResponseDto;
@@ -11,6 +12,7 @@ import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.PostRepositoryCustom;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.criterion.Projection;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Repository;
 
@@ -35,7 +37,8 @@ public class PostRepositoryImpl implements PostRepositoryCustom {
         QPost post = QPost.post;
         Member member = tokenProvider.getMemberFromAuthentication();
         List<Post> results = queryFactory
-                .selectFrom(post)
+                .select(post)
+                .from(post)
                 .orderBy(PostSort(pageable))
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())

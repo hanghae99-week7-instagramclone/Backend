@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 public class LikeController {
     private final LikeService likeService;
 
-    @PostMapping("api/posts/{postId}/likes")
+    @PostMapping("/api/posts/{postId}/likes")
     public ResponseDto<?> Like(@PathVariable Long postId, HttpServletRequest request){
         return likeService.upDownLike(postId, request);
     }

@@ -1,7 +1,5 @@
 package com.sparta.instagramclone.service;
 
-import com.querydsl.core.QueryFactory;
-import com.querydsl.core.QueryResults;
 import com.sparta.instagramclone.domain.Comment;
 import com.sparta.instagramclone.domain.Like;
 import com.sparta.instagramclone.domain.Member;
@@ -11,13 +9,12 @@ import com.sparta.instagramclone.dto.response.*;
 import com.sparta.instagramclone.repository.CommentRepository;
 import com.sparta.instagramclone.repository.LikeRepository;
 import com.sparta.instagramclone.repository.PostRepository;
+import com.sparta.instagramclone.repository.PostRepositoryImpl;
 import com.sparta.instagramclone.shared.Verification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
